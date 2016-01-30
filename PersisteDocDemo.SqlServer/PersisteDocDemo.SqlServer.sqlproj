@@ -60,5 +60,6 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Todo.sql" />
+    <Build Include="Task.sql" />
   </ItemGroup>
 </Project>

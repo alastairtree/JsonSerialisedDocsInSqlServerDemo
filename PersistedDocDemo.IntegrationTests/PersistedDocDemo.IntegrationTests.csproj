@@ -50,6 +50,8 @@
   <ItemGroup>
     <Compile Include="RepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveToDoWithSerialisableSoPrivateFieldsGetPersisted - Copy.cs" />
+    <Compile Include="SaveToDoWithoutSerialisableSoonlyPublicPropertiesGetPersisted.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -59,10 +61,6 @@
     <ProjectReference Include="..\PersistedDocDemo.Data\PersistedDocDemo.Data.csproj">
       <Project>{BE282699-855D-4F4E-81F0-A65B0351A267}</Project>
       <Name>PersistedDocDemo.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PersistedDocDemo\PersistedDocDemo.csproj">
-      <Project>{9FFBA9EB-1EC6-4541-9552-A19B47F6326B}</Project>
-      <Name>PersistedDocDemo</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -6,23 +6,23 @@ using PersistedDocDemo.Data;
 namespace PersistedDocDemo.IntegrationTests
 {
     [TestFixture]
-    public class RepositoryTests
+    public abstract class RepositoryTests<TEntity> where TEntity : new()
     {
         [SetUp]
-        public void BeforeEachTest()
+        public virtual void BeforeEachTest()
         {
             repository =
-                new SqlServerRepository<Todo>(ConfigurationManager.ConnectionStrings["PersistedDb"].ConnectionString);
+                new SqlServerRepository<TEntity>(ConfigurationManager.ConnectionStrings["PersistedDb"].ConnectionString);
             repository.DeleteAll();
             newItem = GetNewItem();
         }
 
-        private Todo newItem;
-        private SqlServerRepository<Todo> repository;
+        protected TEntity newItem;
+        protected SqlServerRepository<TEntity> repository;
 
-        private static Todo GetNewItem()
+        protected TEntity GetNewItem()
         {
-            return new Todo {Name = "testName"};
+            return new TEntity();;
         }
 
         [Test]
@@ -38,10 +38,10 @@ namespace PersistedDocDemo.IntegrationTests
         public void DeleteByIdReturnsTrueAndHasDeletedTheRow()
         {
             repository.Save(newItem);
-            var result = repository.Delete(newItem.Id);
+            var result = repository.Delete(GetId(newItem));
 
             Assert.True(result);
-            Assert.IsNull(repository.Get(newItem.Id));
+            Assert.IsNull(repository.Get(GetId(newItem)));
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace PersistedDocDemo.IntegrationTests
             var result = repository.Delete(newItem);
 
             Assert.True(result);
-            Assert.IsNull(repository.Get(newItem.Id));
+            Assert.IsNull(repository.Get(GetId(newItem)));
         }
 
         [Test]
@@ -72,44 +72,15 @@ namespace PersistedDocDemo.IntegrationTests
         }
 
         [Test]
-        public void GetAllReturnsManyResults()
+        public void SaveTwiceAndGetAllReturnResults()
         {
             repository.Save(GetNewItem());
             repository.Save(GetNewItem());
             var allItems = repository.GetAll();
 
             Assert.AreEqual(2, allItems.Count);
-        }
+        }      
 
-        [Test]
-        public void GetFromTheDatabaseDeserialisesSucessfully()
-        {
-            repository.Save(newItem);
-            var databaseValue = repository.Get(newItem.Id);
-
-            Assert.AreEqual("testName", databaseValue.Name);
-        }
-
-        [Test]
-        public void SaveToTheDatabaseAssignsNewidentity()
-        {
-            repository.Save(newItem);
-            Assert.Greater(newItem.Id, 0);
-        }
-
-        [Test]
-        public void SaveTwiceIsAnUpdateWithSameId()
-        {
-            repository.Save(newItem);
-            var idBeffore = newItem.Id;
-            newItem.Name = "update";
-            repository.Save(newItem);
-            var idAfter = newItem.Id;
-            var items = repository.GetAll();
-
-            Assert.AreEqual(idBeffore, idAfter);
-            Assert.AreEqual(1, items.Count);
-            Assert.AreEqual("update", items.Single().Name);
-        }
+        protected abstract object GetId(TEntity item);
     }
 }

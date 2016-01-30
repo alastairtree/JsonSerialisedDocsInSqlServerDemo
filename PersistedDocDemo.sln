@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersistedDocDemo", "PersistedDocDemo\PersistedDocDemo.csproj", "{9FFBA9EB-1EC6-4541-9552-A19B47F6326B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersistedDocDemo.Data", "PersistedDocDemo.Data\PersistedDocDemo.Data.csproj", "{BE282699-855D-4F4E-81F0-A65B0351A267}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "PersisteDocDemo.SqlServer", "PersisteDocDemo.SqlServer\PersisteDocDemo.SqlServer.sqlproj", "{981871B2-4FE7-4E8B-80CA-35D349CA07AE}"
@@ -17,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9FFBA9EB-1EC6-4541-9552-A19B47F6326B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9FFBA9EB-1EC6-4541-9552-A19B47F6326B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9FFBA9EB-1EC6-4541-9552-A19B47F6326B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9FFBA9EB-1EC6-4541-9552-A19B47F6326B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BE282699-855D-4F4E-81F0-A65B0351A267}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE282699-855D-4F4E-81F0-A65B0351A267}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE282699-855D-4F4E-81F0-A65B0351A267}.Release|Any CPU.ActiveCfg = Release|Any CPU

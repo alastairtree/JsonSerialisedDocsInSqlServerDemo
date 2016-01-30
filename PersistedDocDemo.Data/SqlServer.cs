@@ -30,6 +30,18 @@ namespace PersistedDocDemo.Data
             return value;
         }
 
+        public DataTable ExecuteSqlTableQuery(string sql, params Tuple<string, object>[] parameters)
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var command = CreateCommand(sql, parameters, conn);
+                var adapter = new SqlDataAdapter(command);
+                var dataTable = new DataTable();
+                adapter.Fill(dataTable);
+                return dataTable;
+            }
+        }
+
         private static SqlCommand CreateCommand(string sql, Tuple<string, object>[] parameters, SqlConnection conn)
         {
             var command = new SqlCommand(sql, conn);
@@ -44,18 +56,6 @@ namespace PersistedDocDemo.Data
 
             conn.Open();
             return command;
-        }
-
-        public DataTable ExecuteSqlTableQuery(string sql, params Tuple<string, object>[] parameters)
-        {
-            using (var conn = new SqlConnection(ConnectionString))
-            {
-                var command = CreateCommand(sql, parameters, conn);
-                var adapter = new SqlDataAdapter(command);
-                var dataTable = new DataTable();
-                adapter.Fill(dataTable);
-                return dataTable;
-            }
         }
     }
 }

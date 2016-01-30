@@ -26,7 +26,7 @@ namespace PersistedDocDemo.Data
             database.ConnectionString = connectionString;
         }
 
-        public IRepositoryConfig Config { get; private set; }
+        public IRepositoryConfig Config { get; }
 
         public string TableName
         {
