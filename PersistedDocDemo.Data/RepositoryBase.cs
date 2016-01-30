@@ -1,12 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace PersistedDocDemo.Data
 {
     public abstract class RepositoryBase<T> : IRepository<T>
     {
-        protected readonly string identityFieldName = "Id";
+        protected readonly string IdentityFieldName;
+
+        protected RepositoryBase()
+        {
+            IdentityFieldName = GetIdentityFieldName();
+        }
+
         public IEntitySerialiser Serialiser { get; protected set; }
 
         public abstract T Get(object id);
@@ -21,19 +30,86 @@ namespace PersistedDocDemo.Data
             return id == null || id.Equals(0) || id.Equals(string.Empty) || id.Equals(Guid.Empty);
         }
 
-        protected object GetIdentityValue<TKey>(T item)
+        protected object GetIdentityValue(T item)
         {
             if (item == null) throw new ArgumentNullException("item");
 
-            var parameterExpression = Expression.Variable(typeof (T));
-            var identityGetter = Expression.Property(parameterExpression, identityFieldName);
-            var identityValueGetter = Expression.Lambda<Func<T, TKey>>(identityGetter, parameterExpression).Compile();
+            if (string.IsNullOrEmpty(IdentityFieldName))
+                throw new NotSupportedException(
+                    "Unable to determine identity field by convention - add a [Key] attribute or Id property");
+
+            var identityValueGetter = CreateLambdaGetter(IdentityFieldName);
+
             return identityValueGetter.Invoke(item);
         }
 
-        protected static void SetIdentity(T item, object id)
+        private static Func<T, object> CreateLambdaGetter(string fieldName)
         {
-            (item as Todo).Id = Convert.ToInt32(id);
+            var itemExpressionVariable = Expression.Variable(typeof (T));
+            var propertyExpression = Expression.Property(itemExpressionVariable, fieldName);
+
+            Expression propertyExpressionToObject = Expression.Convert(propertyExpression, typeof (object));
+            var getter =
+                Expression.Lambda<Func<T, object>>(propertyExpressionToObject, itemExpressionVariable).Compile();
+
+            return getter;
+        }
+
+        protected void SetIdentity(T item, object id)
+        {
+            var setter = CreatePropertySetter(IdentityFieldName, id.GetType());
+
+            setter(item, id);
+        }
+
+        protected static Action<T, object> CreatePropertySetter(string propertyName, Type valueType)
+        {
+            var target = Expression.Parameter(typeof (T), "obj");
+            var value = Expression.Parameter(typeof (object), "value`");
+            var property = typeof (T).GetProperty(propertyName);
+            var unboxed = Expression.Convert(value, valueType);
+            var body = Expression.Assign(
+                Expression.Property(target, property),
+                Expression.Convert(unboxed, property.PropertyType));
+
+            var lambda = Expression.Lambda<Action<T, object>>(body, target, value);
+            return lambda.Compile();
+        }
+
+        protected string GetIdentityFieldName()
+        {
+            //try and get by [Key] attributePredicate
+            var byAttribute = GetPropertyNameByCustomAttribute<T, KeyAttribute>();
+            if (byAttribute.Any())
+            {
+                if (byAttribute.Length > 1)
+                    throw new NotSupportedException(
+                        "Cannot support compound keys - entities with more then one property decorated with a [Key] attribute are not allowed");
+                return byAttribute.Single();
+            }
+
+            //try and get by naming convention [Id, EntityId, Key, EntityKey]
+            var typeName = typeof (T).Name.ToLower();
+            foreach (
+                var property in
+                    typeof (T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(p => p.Name))
+            {
+                if (property.ToLower() == "id") return property;
+                if (property.ToLower() == (typeName + "id")) return property;
+                if (property.ToLower() == "key") return property;
+                if (property.ToLower() == (typeName + "key")) return property;
+            }
+            return null;
+        }
+
+        protected static string[] GetPropertyNameByCustomAttribute<ClassToAnalyse, AttributeTypeToFind>()
+            where AttributeTypeToFind : Attribute
+        {
+            return (from propertyInfo in
+                typeof (ClassToAnalyse).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                where propertyInfo.GetCustomAttributes(typeof (AttributeTypeToFind), true).Any()
+                select propertyInfo.Name)
+                .ToArray();
         }
     }
 }

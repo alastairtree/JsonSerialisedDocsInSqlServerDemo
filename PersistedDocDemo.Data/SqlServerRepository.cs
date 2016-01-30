@@ -43,7 +43,7 @@ namespace PersistedDocDemo.Data
 
         public override T Get(object id)
         {
-            var sql = string.Format("SELECT [Data] FROM {0} WHERE [{1}] = @id", TableName, identityFieldName);
+            var sql = string.Format("SELECT [Data] FROM {0} WHERE [{1}] = @id", TableName, IdentityFieldName);
 
             var data = database.ExecuteSqlScalar(sql, Tuple.Create("id", id));
             var value = default(T);
@@ -77,7 +77,7 @@ namespace PersistedDocDemo.Data
         public override void Save(T item)
         {
             if (item == null) throw new ArgumentNullException("item");
-            var id = GetIdentityValue<int>(item);
+            var id = GetIdentityValue(item);
             string sql;
             if (IsUndefinedKey(id))
             {
@@ -96,7 +96,7 @@ namespace PersistedDocDemo.Data
 
         public override bool Delete(object id)
         {
-            var sql = string.Format("DELETE FROM {0} WHERE [{1}] = @id", TableName, identityFieldName);
+            var sql = string.Format("DELETE FROM {0} WHERE [{1}] = @id", TableName, IdentityFieldName);
             var rows = database.ExecuteNonQuery(sql, Tuple.Create("id", id));
             return rows > 0;
         }
@@ -105,7 +105,7 @@ namespace PersistedDocDemo.Data
         {
             if (item == null) throw new ArgumentNullException("item");
 
-            var id = GetIdentityValue<int>(item);
+            var id = GetIdentityValue(item);
             return Delete(id);
         }
 
