@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 
@@ -55,7 +54,7 @@ namespace PersistedDocDemo.Data
             var folderTwo = name.Substring(3, 3);
             var fileName = name.Substring(6, name.Length - 6) + ".dat";
 
-            return Path.Combine(repositoryFolderPath, folderOne, folderTwo, fileName);
+            return Path.Combine(RepositoryFolderPath, folderOne, folderTwo, fileName);
         }
 
         public override T Get(object id)
@@ -66,7 +65,7 @@ namespace PersistedDocDemo.Data
 
             if (File.Exists(fileName))
             {
-                var data = File.ReadAllBytes(fileName);
+                var data = File.ReadAllText(fileName);
 
                 if (data != null)
                 {
@@ -81,13 +80,13 @@ namespace PersistedDocDemo.Data
 
         public override ICollection<T> GetAll()
         {
-            var files = Directory.EnumerateFiles(repositoryFolderPath, "*.dat", SearchOption.AllDirectories);
+            var files = Directory.EnumerateFiles(RepositoryFolderPath, "*.dat", SearchOption.AllDirectories);
 
             var results = new List<T>();
 
             foreach (var fileName in files)
             {
-                var data = File.ReadAllBytes(fileName);
+                var data = File.ReadAllText(fileName);
 
                 var item = Serialiser.DeserializeObject<T>(data);
                 results.Add(item);
@@ -145,7 +144,7 @@ namespace PersistedDocDemo.Data
 
         public override bool DeleteAll()
         {
-            var files = Directory.EnumerateFiles(repositoryFolderPath, "*.dat", SearchOption.AllDirectories);
+            var files = Directory.EnumerateFiles(RepositoryFolderPath, "*.dat", SearchOption.AllDirectories);
 
             var results = 0;
 
@@ -155,20 +154,17 @@ namespace PersistedDocDemo.Data
                 results++;
             }
 
-            removeEmptyDirectories(repositoryFolderPath);
+            RemoveEmptyDirectories(RepositoryFolderPath);
 
             return results > 0;
         }
 
-        private void removeEmptyDirectories(string path)
+        static void RemoveEmptyDirectories(string path)
         {
-            var di = new DirectoryInfo(path);
-
-            foreach (DirectoryInfo dir in di.GetDirectories("*",SearchOption.AllDirectories))
-            {
-                if(!dir.GetFiles().Any())
-                    dir.Delete(true);
-            }
+            System.Threading.Tasks.Parallel.ForEach(System.IO.Directory.GetDirectories(path), directory => {
+                RemoveEmptyDirectories(directory);
+                if (!System.IO.Directory.EnumerateFileSystemEntries(directory).Any()) System.IO.Directory.Delete(directory, false);
+            });
         }
     }
 }
