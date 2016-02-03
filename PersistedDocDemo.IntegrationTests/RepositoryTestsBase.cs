@@ -5,25 +5,22 @@ using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
 {
-    [TestFixture]
-    public abstract class RepositoryTests<TEntity> where TEntity : new()
+    public abstract class RepositoryTestsBase<TEntity> where TEntity : new()
     {
         [SetUp]
         public virtual void BeforeEachTest()
         {
-            repository =
-                new SqlServerRepository<TEntity>(ConfigurationManager.ConnectionStrings["PersistedDb"].ConnectionString);
+            repository = BuildRepository();
             repository.DeleteAll();
             newItem = GetNewItem();
         }
 
-        protected TEntity newItem;
-        protected SqlServerRepository<TEntity> repository;
+        internal abstract IRepository<TEntity> BuildRepository();
 
-        protected TEntity GetNewItem()
-        {
-            return new TEntity();;
-        }
+        protected TEntity newItem;
+        protected IRepository<TEntity> repository;
+
+        protected abstract TEntity GetNewItem(); 
 
         [Test]
         public void DeleteAllEntriesTheTable()
@@ -74,8 +71,10 @@ namespace PersistedDocDemo.IntegrationTests
         [Test]
         public void SaveTwiceAndGetAllReturnResults()
         {
-            repository.Save(GetNewItem());
-            repository.Save(GetNewItem());
+            var item1 = GetNewItem();
+            var item2= GetNewItem();
+            repository.Save(item1);
+            repository.Save(item2);
             var allItems = repository.GetAll();
 
             Assert.AreEqual(2, allItems.Count);
