@@ -3,15 +3,22 @@ using System.Linq;
 using NUnit.Framework;
 using PersistedDocDemo.Data;
 using System.Configuration;
+using System.Collections.Generic;
 
 namespace PersistedDocDemo.IntegrationTests
 {
     [Serializable]
     public class Todo
     {
+        public Todo()
+        {
+            ChildTasks = new List<Todo>();
+        }
         private DateTime created = DateTime.UtcNow;
         public int Id { get; set; }
         public string Name { get; set; }
+
+        public ICollection<Todo> ChildTasks { get; private set; }
     }
 
 
@@ -39,6 +46,19 @@ namespace PersistedDocDemo.IntegrationTests
         {
             repository.Save(newItem);
             Assert.Greater(newItem.Id, 0);
+        }
+
+        [Test]
+        public void SaveChildItemsAndDeserialiseTheProperly()
+        {
+            newItem.ChildTasks.Add(GetNewItem());
+            newItem.ChildTasks.Add(GetNewItem());
+            newItem.ChildTasks.Add(GetNewItem());
+
+            repository.Save(newItem);
+            var deserialisedChildren = repository.Get(newItem.Id).ChildTasks;
+
+            Assert.AreEqual(3, deserialisedChildren.Count);
         }
 
         [Test]
