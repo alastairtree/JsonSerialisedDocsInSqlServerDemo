@@ -6,11 +6,11 @@ using PersistedDocDemo.Data;
 namespace PersistedDocDemo.IntegrationTests
 {
     [TestFixture]
-    public class FileSaveToDoWithSerialisableSoPrivateFieldsGetPersisted : RepositoryTestsBase<Todo>
+    public class InMemorySaveToDoWithSerialisableSoPrivateFieldsGetPersisted : RepositoryTestsBase<Todo>
     {
         private readonly Random rand;
 
-        public FileSaveToDoWithSerialisableSoPrivateFieldsGetPersisted()
+        public InMemorySaveToDoWithSerialisableSoPrivateFieldsGetPersisted()
         {
             rand = new Random();
         }
@@ -59,7 +59,7 @@ namespace PersistedDocDemo.IntegrationTests
 
         internal override IRepository<Todo> BuildRepository()
         {
-            return new FileRepository<Todo>();
+            return new InMemoryRepository<Todo>();
         }
     }
 }

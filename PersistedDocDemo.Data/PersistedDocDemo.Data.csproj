@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DefaultRepositoryConfig.cs" />
+    <Compile Include="InMemoryRepository.cs" />
     <Compile Include="IDatabase.cs" />
     <Compile Include="IEntitySerialiser.cs" />
     <Compile Include="IRepository.cs" />
