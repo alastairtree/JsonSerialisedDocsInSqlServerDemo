@@ -5,9 +5,15 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersistedDocDemo.Data", "PersistedDocDemo.Data\PersistedDocDemo.Data.csproj", "{BE282699-855D-4F4E-81F0-A65B0351A267}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "PersisteDocDemo.SqlServer", "PersisteDocDemo.SqlServer\PersisteDocDemo.SqlServer.sqlproj", "{981871B2-4FE7-4E8B-80CA-35D349CA07AE}"
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "PersistedDocDemo.IntegrationTests.SqlServer", "PersisteDocDemo.SqlServer\PersistedDocDemo.IntegrationTests.SqlServer.sqlproj", "{981871B2-4FE7-4E8B-80CA-35D349CA07AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersistedDocDemo.IntegrationTests", "PersistedDocDemo.IntegrationTests\PersistedDocDemo.IntegrationTests.csproj", "{976F89C8-885B-44CA-894D-FB4086158D56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "info", "info", "{9D09E85C-7FE9-446B-8B28-7BE1D0B892D8}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

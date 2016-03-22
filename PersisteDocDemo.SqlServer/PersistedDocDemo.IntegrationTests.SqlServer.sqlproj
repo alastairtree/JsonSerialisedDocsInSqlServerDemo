@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Name>PersisteDocDemo.SqlServer</Name>
+    <Name>PersistedDocDemo.IntegrationTests.SqlServer</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{981871b2-4fe7-4e8b-80ca-35d349ca07ae}</ProjectGuid>
@@ -60,6 +60,6 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Todo.sql" />
-    <Build Include="Task.sql" />
+    <Build Include="TodoDecoratedWithSerialisable.sql" />
   </ItemGroup>
 </Project>
