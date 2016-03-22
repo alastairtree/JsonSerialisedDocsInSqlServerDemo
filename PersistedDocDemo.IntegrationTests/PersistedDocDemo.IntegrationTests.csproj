@@ -48,12 +48,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileSaveToDoWithSerialisableSoPrivateFieldsGetPersisted - Copy.cs" />
+    <Compile Include="InMemoryReposittoryTests.cs" />
+    <Compile Include="FileRepositortyTests.cs" />
     <Compile Include="RepositoryTestsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlSaveToDoWithSerialisableSoPrivateFieldsGetPersisted.cs" />
-    <Compile Include="InMemorySaveToDoWithSerialisableSoPrivateFieldsGetPersisted.cs" />
-    <Compile Include="SqlSaveToDoWithoutSerialisableSoonlyPublicPropertiesGetPersisted.cs" />
+    <Compile Include="TodoDecoratedWithSerialisable.cs" />
+    <Compile Include="TodoRepositiryTests.cs" />
+    <Compile Include="SqlServerRepositoryTodoTests.cs" />
+    <Compile Include="Todo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
