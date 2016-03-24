@@ -25,13 +25,26 @@ namespace PersistedDocDemo.IntegrationTests
         }
 
         [Test]
-        public void GetFromTheDatabaseDeserialisesSucessfully()
+        public void GetFromTheRepositoryDeserialisesSucessfully()
         {
             newItem.Name = "testName";
             repository.Save(newItem);
 
             var id = GetId(newItem);
             var storedValue = repository.Get(id);
+
+            Assert.AreEqual("testName", storedValue.Name);
+            Assert.AreEqual(id, storedValue.Id);
+        }
+
+        [Test]
+        public void GetAllFromTheRepositoryDeserialisesSucessfully()
+        {
+            newItem.Name = "testName";
+            repository.Save(newItem);
+
+            var id = GetId(newItem);
+            var storedValue = repository.GetAll().Single();
 
             Assert.AreEqual("testName", storedValue.Name);
             Assert.AreEqual(id, storedValue.Id);

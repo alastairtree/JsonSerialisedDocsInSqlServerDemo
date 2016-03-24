@@ -59,7 +59,7 @@ namespace PersistedDocDemo.Data
 
         public override ICollection<T> GetAll()
         {
-            var sql = string.Format("SELECT [Data] FROM {0}", TableName);
+            var sql = string.Format("SELECT {0}, [Data] FROM {1}", IdentityFieldName, TableName);
 
             var data = database.ExecuteSqlTableQuery(sql);
 
@@ -67,7 +67,8 @@ namespace PersistedDocDemo.Data
 
             foreach (DataRow row in data.Rows)
             {
-                var item = Serialiser.DeserializeObject<T>(row[0]);
+                var item = Serialiser.DeserializeObject<T>(row[1]);
+                SetIdentity(item, row[0]);
                 results.Add(item);
             }
 
