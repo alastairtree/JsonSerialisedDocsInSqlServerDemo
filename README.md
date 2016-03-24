@@ -5,16 +5,23 @@ Sample app demonstrating storing serialised domain objects in sql server, files,
 
 Given you want to persist some todo objects
 
-    [Serializable] //we need this because we have use a private backing field "created". If you dont use private fileds you dont need serialisable and only public properties will be serialised.
-    public class Todo
+    // Only need [Serializable] if private fields need to be persisted.
+    [Serializable] 
+    public class Todo //Aggregate root
     {
         public Todo()
         {
             ChildTasks = new List<Todo>();
         }
+        
+        // Will be saved because we used [Serializable]
         private DateTime created = DateTime.UtcNow;
+        
+        // Public properties are always serialised and persisted
         public int Id { get; set; } //naming conventions used to guess the key field
         public string Name { get; set; }
+        
+        // Complex graph of child objects get persisted fine
         public ICollection<Todo> ChildTasks { get; private set; }
     }
 
