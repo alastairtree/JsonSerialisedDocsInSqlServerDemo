@@ -5,7 +5,7 @@ Sample app demonstrating storing serialised domain objects in sql server, files,
 
 Given you want to persist some todo objects
 
-    [Serializable] //we need this because we have use a private backing field created
+    [Serializable] //we need this because we have use a private backing field "created". If you dont use private fileds you dont need serialisable and only public properties will be serialised.
     public class Todo
     {
         public Todo()
