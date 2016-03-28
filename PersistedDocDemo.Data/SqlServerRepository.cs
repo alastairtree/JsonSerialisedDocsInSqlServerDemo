@@ -7,7 +7,7 @@ namespace PersistedDocDemo.Data
     public class SqlServerRepository<T> : RepositoryBase<T>
     {
         private readonly IDatabase database;
-        private string tableName;
+        private readonly SqlBuilder<T> sqlBuilder;
 
         public SqlServerRepository(IEntitySerialiser serialiser, IRepositoryConfig config, IDatabase database)
         {
@@ -15,8 +15,9 @@ namespace PersistedDocDemo.Data
             Serialiser = serialiser;
             Config = config;
             var identityFieldName = GetIdentityFieldName();
-            if(!string.IsNullOrEmpty(IdentityFieldName))
-                serialiser.IgnoreProperty(typeof(T), identityFieldName);
+            if (!string.IsNullOrEmpty(IdentityFieldName))
+                serialiser.IgnoreProperty(typeof (T), identityFieldName);
+            sqlBuilder = new SqlBuilder<T>(Config) {IdentityFieldName = IdentityFieldName};
         }
 
         public SqlServerRepository() : this(new JsonSerialiser(), new DefaultRepositoryConfig(), new SqlServer())
@@ -31,38 +32,31 @@ namespace PersistedDocDemo.Data
 
         public IRepositoryConfig Config { get; }
 
-        public string TableName
-        {
-            get
-            {
-                if (tableName == null)
-                {
-                    tableName = string.Format("[{0}].[{1}]", Config.DatabaseSchemaName, typeof (T).Name);
-                }
-                return tableName;
-            }
-            set { tableName = value; }
-        }
-
         public override T Get(object id)
         {
-            var sql = string.Format("SELECT [Data] FROM {0} WHERE [{1}] = @id", TableName, IdentityFieldName);
+            var sql = sqlBuilder.SelectByIdSql();
 
-            var data = database.ExecuteSqlScalar(sql, Tuple.Create("id", id));
+            var data = database.ExecuteSqlTableQuery(sql, Tuple.Create("id", id));
             var value = default(T);
 
-            if (data != null)
+            if (data.Rows.Count == 1)
             {
-                value = Serialiser.DeserializeObject<T>(data);
-                SetIdentity(value, id);
+                value = DeserialiseRow(data.Rows[0]);
             }
 
             return value;
         }
 
+        private T DeserialiseRow(DataRow row)
+        {
+            var value = Serialiser.DeserializeObject<T>(row[1]);
+            SetIdentity(value, row[0]);
+            return value;
+        }
+
         public override ICollection<T> GetAll()
         {
-            var sql = string.Format("SELECT {0}, [Data] FROM {1}", IdentityFieldName, TableName);
+            var sql = sqlBuilder.SelectAllSql();
 
             var data = database.ExecuteSqlTableQuery(sql);
 
@@ -70,8 +64,7 @@ namespace PersistedDocDemo.Data
 
             foreach (DataRow row in data.Rows)
             {
-                var item = Serialiser.DeserializeObject<T>(row[1]);
-                SetIdentity(item, row[0]);
+                var item = DeserialiseRow(data.Rows[0]);
                 results.Add(item);
             }
 
@@ -85,11 +78,11 @@ namespace PersistedDocDemo.Data
             string sql;
             if (IsUndefinedKey(id))
             {
-                sql = string.Format("INSERT {0} ([Data]) VALUES (@data); SELECT SCOPE_IDENTITY();", TableName);
+                sql = sqlBuilder.InsertSql();
             }
             else
             {
-                sql = string.Format("UPDATE {0} SET [Data] = @data;", TableName);
+                sql = sqlBuilder.UpdateSql();
             }
 
             var serialisedData = Serialiser.SerializeObject(item);
@@ -100,7 +93,7 @@ namespace PersistedDocDemo.Data
 
         public override bool Delete(object id)
         {
-            var sql = string.Format("DELETE FROM {0} WHERE [{1}] = @id", TableName, IdentityFieldName);
+            var sql = sqlBuilder.DeleteByIdSql();
             var rows = database.ExecuteNonQuery(sql, Tuple.Create("id", id));
             return rows > 0;
         }
@@ -115,7 +108,8 @@ namespace PersistedDocDemo.Data
 
         public override bool DeleteAll()
         {
-            var rows = database.ExecuteNonQuery(string.Format("DELETE FROM {0}", TableName));
+            var sql = sqlBuilder.DeleteSql();
+            var rows = database.ExecuteNonQuery(sql);
             return rows > 0;
         }
     }

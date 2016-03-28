@@ -9,15 +9,13 @@ namespace PersistedDocDemo.Data
 {
     public abstract class RepositoryBase<T> : IRepository<T>
     {
-        protected readonly string IdentityFieldName;
-
         protected RepositoryBase()
         {
             IdentityFieldName = GetIdentityFieldName();
         }
 
+        protected string IdentityFieldName { get; }
         public IEntitySerialiser Serialiser { get; protected set; }
-
         public abstract T Get(object id);
         public abstract ICollection<T> GetAll();
         public abstract void Save(T item);
@@ -32,7 +30,7 @@ namespace PersistedDocDemo.Data
 
         protected object GetIdentityValue(T item)
         {
-            if (item == null) throw new ArgumentNullException("item");
+            if (item == null) throw new ArgumentNullException(nameof(item));
 
             if (string.IsNullOrEmpty(IdentityFieldName))
                 throw new NotSupportedException(
