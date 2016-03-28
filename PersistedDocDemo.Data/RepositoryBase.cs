@@ -84,7 +84,7 @@ namespace PersistedDocDemo.Data
             {
                 if (byAttribute.Length > 1)
                     throw new NotSupportedException(
-                        "Cannot support compound keys - entities with more then one property decorated with a [Key] attribute are not allowed");
+                        "Cannot support compound keys - entities with more then one property decorated with a [Key] attribute are not allowed. Use an integer Identity instead?");
                 return byAttribute.Single();
             }
 

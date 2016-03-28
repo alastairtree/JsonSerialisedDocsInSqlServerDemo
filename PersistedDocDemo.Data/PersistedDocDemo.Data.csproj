@@ -59,6 +59,7 @@
     <Compile Include="SqlServer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IgnorablePropertyCamelCaseNamesContractResolver.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

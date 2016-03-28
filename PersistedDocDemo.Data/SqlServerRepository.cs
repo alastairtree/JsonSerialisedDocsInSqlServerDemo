@@ -14,6 +14,9 @@ namespace PersistedDocDemo.Data
             this.database = database;
             Serialiser = serialiser;
             Config = config;
+            var identityFieldName = GetIdentityFieldName();
+            if(!string.IsNullOrEmpty(IdentityFieldName))
+                serialiser.IgnoreProperty(typeof(T), identityFieldName);
         }
 
         public SqlServerRepository() : this(new JsonSerialiser(), new DefaultRepositoryConfig(), new SqlServer())

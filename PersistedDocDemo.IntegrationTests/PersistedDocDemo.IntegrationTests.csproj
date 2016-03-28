@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="InMemoryReposittoryTests.cs" />
     <Compile Include="FileRepositortyTests.cs" />
+    <Compile Include="JsonSerialiserTests.cs" />
     <Compile Include="RepositoryTestsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TodoDecoratedWithSerialisable.cs" />
