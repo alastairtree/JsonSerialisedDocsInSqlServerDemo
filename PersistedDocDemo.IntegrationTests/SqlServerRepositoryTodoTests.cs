@@ -40,7 +40,7 @@ namespace PersistedDocDemo.IntegrationTests
 
             var sql = sqlBuilder.SelectByIdSql();
             var data = database.ExecuteSqlTableQuery(sql, Tuple.Create<string, object>("id", item.Id));
-            var json = data.Rows[0][1] as string;
+            var json = data.Rows[0]["data"] as string;
 
             Assert.NotNull(json);
             Assert.False(json.Contains("\"id\":"));
@@ -59,7 +59,7 @@ namespace PersistedDocDemo.IntegrationTests
 
             var sql = sqlBuilder.SelectByIdSql();
             var data = database.ExecuteSqlTableQuery(sql, Tuple.Create<string, object>("id", item.Id));
-            var json = data.Rows[0][1] as string;
+            var json = data.Rows[0]["data"] as string;
 
             Assert.NotNull(json);
             Assert.False(json.Contains("Red"));
