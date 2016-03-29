@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+
 namespace PersistedDocDemo.Data
 {
-    internal class SqlBuilder<TEntity>
+    public class SqlBuilder<TEntity>
     {
         private readonly IRepositoryConfig config;
         private string tableName;
@@ -8,6 +10,7 @@ namespace PersistedDocDemo.Data
         public SqlBuilder(IRepositoryConfig config)
         {
             this.config = config;
+            this.SqlColumns = new List<string>();
         }
 
         public string TableName
@@ -16,7 +19,7 @@ namespace PersistedDocDemo.Data
             {
                 if (tableName == null)
                 {
-                    tableName = string.Format("[{0}].[{1}]", config.DatabaseSchemaName, typeof (TEntity).Name);
+                    tableName = $"[{config.DatabaseSchemaName}].[{typeof (TEntity).Name}]";
                 }
                 return tableName;
             }
@@ -24,35 +27,60 @@ namespace PersistedDocDemo.Data
         }
 
         public string IdentityFieldName { get; set; }
+        public ICollection<string> SqlColumns { get; set; }
 
         public string SelectByIdSql()
         {
-            return string.Format("SELECT {0}, [Data] FROM {1} WHERE [{0}] = @id", IdentityFieldName, TableName);
+            return $"SELECT {GenerateColumns()} FROM {TableName} WHERE [{IdentityFieldName}] = @id";
         }
 
         public string SelectAllSql()
         {
-            return string.Format("SELECT {0}, [Data] FROM {1}", IdentityFieldName, TableName);
+            return $"SELECT {GenerateColumns()} FROM {TableName}";
         }
 
         public string UpdateSql()
         {
-            return string.Format("UPDATE {0} SET [Data] = @data;", TableName);
+            var setters = GenerateColumns(true, "[{0}]=@{0}");
+            return $"UPDATE {TableName} SET {setters};";
         }
 
         public string InsertSql()
         {
-            return string.Format("INSERT {0} ([Data]) VALUES (@data); SELECT SCOPE_IDENTITY();", TableName);
+            var sqlColumns = GenerateColumns(true);
+            var sqlColumnParams = GenerateColumns(true, "@{0}");
+            return $"INSERT {TableName} ({sqlColumns}) VALUES ({sqlColumnParams}); SELECT SCOPE_IDENTITY();";
+        }
+
+        private string GenerateColumns(bool surpressId = false, string format = "[{0}]")
+        {
+            var columnNames = new List<string>();
+            if (!surpressId)
+                columnNames.Add(IdentityFieldName);
+            columnNames.AddRange(SqlColumns);
+            columnNames.Add("Data");
+
+            var text = string.Empty;
+            for (var i = 0; i < columnNames.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(columnNames[i]))
+                    text += string.Format(format, columnNames[i]);
+                if (i != columnNames.Count - 1)
+                {
+                    text += ",";
+                }
+            }
+            return text;
         }
 
         public string DeleteByIdSql()
         {
-            return string.Format("DELETE FROM {0} WHERE [{1}] = @id", TableName, IdentityFieldName);
+            return $"DELETE FROM {TableName} WHERE [{IdentityFieldName}] = @id";
         }
 
         public string DeleteSql()
         {
-            return string.Format("DELETE FROM {0}", TableName);
+            return $"DELETE FROM {TableName}";
         }
     }
 }

@@ -28,6 +28,7 @@ namespace PersistedDocDemo.IntegrationTests
         public void GetFromTheRepositoryDeserialisesSucessfully()
         {
             newItem.Name = "testName";
+            newItem.Colour = "Blue";
             repository.Save(newItem);
 
             var id = GetId(newItem);
@@ -35,6 +36,7 @@ namespace PersistedDocDemo.IntegrationTests
 
             Assert.AreEqual("testName", storedValue.Name);
             Assert.AreEqual(id, storedValue.Id);
+            Assert.AreEqual("Blue", storedValue.Colour);
         }
 
         [Test]
@@ -46,6 +48,7 @@ namespace PersistedDocDemo.IntegrationTests
             var id = GetId(newItem);
             var storedValue = repository.GetAll().Single();
 
+            Assert.NotNull(storedValue);
             Assert.AreEqual("testName", storedValue.Name);
             Assert.AreEqual(id, storedValue.Id);
         }
