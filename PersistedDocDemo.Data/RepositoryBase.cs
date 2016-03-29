@@ -11,10 +11,11 @@ namespace PersistedDocDemo.Data
     {
         protected RepositoryBase()
         {
+            // TODO: Add caching on reflection to get identity
             IdentityFieldName = GetIdentityFieldName();
         }
 
-        protected string IdentityFieldName { get; }
+        public string IdentityFieldName { get; }
         public IEntitySerialiser Serialiser { get; protected set; }
         public abstract T Get(object id);
         public abstract ICollection<T> GetAll();
@@ -36,17 +37,27 @@ namespace PersistedDocDemo.Data
                 throw new NotSupportedException(
                     "Unable to determine identity field by convention - add a [Key] attribute or Id property");
 
-            var identityValueGetter = CreateLambdaGetter(IdentityFieldName);
+            return GetValueFromProperty(item, IdentityFieldName);
+        }
+
+        protected static object GetValueFromProperty(T item, string propertyName)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+
+            if (string.IsNullOrEmpty(propertyName)) throw new NotSupportedException(
+                    "Unable to determine which property to read from");
+
+            var identityValueGetter = CreateLambdaGetter(propertyName);
 
             return identityValueGetter.Invoke(item);
         }
 
         private static Func<T, object> CreateLambdaGetter(string fieldName)
         {
-            var itemExpressionVariable = Expression.Variable(typeof (T));
+            var itemExpressionVariable = Expression.Variable(typeof(T));
             var propertyExpression = Expression.Property(itemExpressionVariable, fieldName);
 
-            Expression propertyExpressionToObject = Expression.Convert(propertyExpression, typeof (object));
+            Expression propertyExpressionToObject = Expression.Convert(propertyExpression, typeof(object));
             var getter =
                 Expression.Lambda<Func<T, object>>(propertyExpressionToObject, itemExpressionVariable).Compile();
 
@@ -55,16 +66,23 @@ namespace PersistedDocDemo.Data
 
         protected void SetIdentity(T item, object id)
         {
-            var setter = CreatePropertySetter(IdentityFieldName, id.GetType());
+            SetProperty(item, IdentityFieldName, id);
+        }
 
-            setter(item, id);
+        protected void SetProperty(T item, string propertyName, object value)
+        {
+            if (value != DBNull.Value)
+            {
+               var  setter = CreatePropertySetter(propertyName, value.GetType());
+                setter(item, value);
+            }
         }
 
         protected static Action<T, object> CreatePropertySetter(string propertyName, Type valueType)
         {
-            var target = Expression.Parameter(typeof (T), "obj");
-            var value = Expression.Parameter(typeof (object), "value`");
-            var property = typeof (T).GetProperty(propertyName);
+            var target = Expression.Parameter(typeof(T), "obj");
+            var value = Expression.Parameter(typeof(object), "value`");
+            var property = typeof(T).GetProperty(propertyName);
             var unboxed = Expression.Convert(value, valueType);
             var body = Expression.Assign(
                 Expression.Property(target, property),
@@ -87,10 +105,10 @@ namespace PersistedDocDemo.Data
             }
 
             //try and get by naming convention [Id, EntityId, Key, EntityKey]
-            var typeName = typeof (T).Name.ToLower();
+            var typeName = typeof(T).Name.ToLower();
             foreach (
                 var property in
-                    typeof (T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(p => p.Name))
+                    typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(p => p.Name))
             {
                 if (property.ToLower() == "id") return property;
                 if (property.ToLower() == (typeName + "id")) return property;
@@ -104,9 +122,9 @@ namespace PersistedDocDemo.Data
             where AttributeTypeToFind : Attribute
         {
             return (from propertyInfo in
-                typeof (ClassToAnalyse).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                where propertyInfo.GetCustomAttributes(typeof (AttributeTypeToFind), true).Any()
-                select propertyInfo.Name)
+                typeof(ClassToAnalyse).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    where propertyInfo.GetCustomAttributes(typeof(AttributeTypeToFind), true).Any()
+                    select propertyInfo.Name)
                 .ToArray();
         }
     }
