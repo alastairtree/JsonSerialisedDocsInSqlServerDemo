@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace PersistedDocDemo.Data
@@ -20,7 +19,7 @@ namespace PersistedDocDemo.Data
 
 
         public IRepositoryConfig Config { get; }
-        private Dictionary<object, object> Store { get; set; }
+        private Dictionary<object, object> Store { get; }
 
         public override T Get(object id)
         {
@@ -35,7 +34,6 @@ namespace PersistedDocDemo.Data
                     value = Serialiser.DeserializeObject<T>(data);
                     SetIdentity(value, id);
                 }
-
             }
 
             return value;
@@ -63,15 +61,10 @@ namespace PersistedDocDemo.Data
             {
                 throw new NotSupportedException("undefined key - you must use a key with a file repository");
             }
-            else
-            {
-
-            }
 
             var serialisedData = Serialiser.SerializeObject(item);
 
             Store[id] = serialisedData;
-
         }
 
         public override bool Delete(object id)
@@ -98,7 +91,7 @@ namespace PersistedDocDemo.Data
 
             foreach (var id in Store.Keys.ToList())
             {
-                if(Delete(id))
+                if (Delete(id))
                     results++;
             }
 

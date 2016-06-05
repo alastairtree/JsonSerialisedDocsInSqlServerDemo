@@ -10,7 +10,7 @@ namespace PersistedDocDemo.Data
         public SqlBuilder(IRepositoryConfig config)
         {
             this.config = config;
-            this.SqlColumns = new List<string>();
+            SqlColumns = new List<string>();
         }
 
         public string TableName

@@ -4,8 +4,8 @@ using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
 {
-    [TestFixture(typeof(Todo))]
-    [TestFixture(typeof(TodoDecoratedWithSerialisable))]
+    [TestFixture(typeof (Todo))]
+    [TestFixture(typeof (TodoDecoratedWithSerialisable))]
     public class FileRepositortyTests<TodoEntity> : TodoRepositoryTestsBase<TodoEntity> where TodoEntity : Todo, new()
     {
         private readonly Random rand;
@@ -17,8 +17,9 @@ namespace PersistedDocDemo.IntegrationTests
 
         protected override TodoEntity GetNewItem()
         {
-            return new TodoEntity() { Id = rand.Next() };
+            return new TodoEntity {Id = rand.Next()};
         }
+
         internal override IRepository<TodoEntity> BuildRepository()
         {
             return new FileRepository<TodoEntity>();

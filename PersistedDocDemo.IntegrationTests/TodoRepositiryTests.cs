@@ -3,8 +3,8 @@ using NUnit.Framework;
 
 namespace PersistedDocDemo.IntegrationTests
 {
-    public abstract class TodoRepositoryTestsBase<TodoEntity> : RepositoryTestsBase<TodoEntity> 
-            where TodoEntity : Todo, new()
+    public abstract class TodoRepositoryTestsBase<TodoEntity> : RepositoryTestsBase<TodoEntity>
+        where TodoEntity : Todo, new()
     {
         protected override object GetId(TodoEntity item)
         {

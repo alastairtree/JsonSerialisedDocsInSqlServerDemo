@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PersistedDocDemo.Data
 {
@@ -42,7 +43,7 @@ namespace PersistedDocDemo.Data
 
         public string GetTemporaryDirectory()
         {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
             return tempDirectory;
         }
@@ -72,7 +73,6 @@ namespace PersistedDocDemo.Data
                     value = Serialiser.DeserializeObject<T>(data);
                     SetIdentity(value, id);
                 }
-
             }
 
             return value;
@@ -104,10 +104,6 @@ namespace PersistedDocDemo.Data
             {
                 throw new NotSupportedException("undefined key - you must use a key with a file repository");
             }
-            else
-            {
-
-            }
 
             var serialisedData = Serialiser.SerializeObject(item);
 
@@ -119,7 +115,6 @@ namespace PersistedDocDemo.Data
             }
 
             File.WriteAllText(fileName, serialisedData.ToString());
-
         }
 
         public override bool Delete(object id)
@@ -159,11 +154,12 @@ namespace PersistedDocDemo.Data
             return results > 0;
         }
 
-        static void RemoveEmptyDirectories(string path)
+        private static void RemoveEmptyDirectories(string path)
         {
-            System.Threading.Tasks.Parallel.ForEach(System.IO.Directory.GetDirectories(path), directory => {
+            Parallel.ForEach(Directory.GetDirectories(path), directory =>
+            {
                 RemoveEmptyDirectories(directory);
-                if (!System.IO.Directory.EnumerateFileSystemEntries(directory).Any()) System.IO.Directory.Delete(directory, false);
+                if (!Directory.EnumerateFileSystemEntries(directory).Any()) Directory.Delete(directory, false);
             });
         }
     }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Reflection;
 
 namespace PersistedDocDemo.Data
 {
@@ -21,9 +19,23 @@ namespace PersistedDocDemo.Data
             InitColumnMapping();
         }
 
+        public SqlServerRepository() : this(new JsonSerialiser(), new DefaultRepositoryConfig(), new SqlServer())
+        {
+        }
+
+        public SqlServerRepository(string connectionString)
+            : this()
+        {
+            database.ConnectionString = connectionString;
+        }
+
+        public ICollection<string> SqlColumns { get; set; }
+
+        public IRepositoryConfig Config { get; }
+
         private void InitColumnMapping()
         {
-            SqlColumns = GetPropertyNameByCustomAttribute<T, SqlColumnAttribute>() ?? new string [0];
+            SqlColumns = GetPropertyNameByCustomAttribute<T, SqlColumnAttribute>() ?? new string[0];
 
             foreach (var sqlColumn in SqlColumns)
             {
@@ -35,7 +47,7 @@ namespace PersistedDocDemo.Data
                 }
                 else // ignore the property
                 {
-                    Serialiser.IgnoreProperty(typeof(T), sqlColumn);
+                    Serialiser.IgnoreProperty(typeof (T), sqlColumn);
                 }
             }
 
@@ -56,26 +68,12 @@ namespace PersistedDocDemo.Data
                 }
                 else
                 {
-                    Serialiser.IgnoreProperty(typeof(T), identityFieldName);
+                    Serialiser.IgnoreProperty(typeof (T), identityFieldName);
                 }
             }
 
             sqlBuilder = new SqlBuilder<T>(Config) {IdentityFieldName = IdentityFieldName};
         }
-
-        public ICollection<string> SqlColumns { get; set; }
-
-        public SqlServerRepository() : this(new JsonSerialiser(), new DefaultRepositoryConfig(), new SqlServer())
-        {
-        }
-
-        public SqlServerRepository(string connectionString)
-            : this()
-        {
-            database.ConnectionString = connectionString;
-        }
-
-        public IRepositoryConfig Config { get; }
 
         public override T Get(object id)
         {
@@ -95,7 +93,7 @@ namespace PersistedDocDemo.Data
         private T DeserialiseRow(DataRow row)
         {
             var value = Serialiser.DeserializeObject<T>(row["Data"]);
-            if(value != null)
+            if (value != null)
                 SetIdentity(value, row[IdentityFieldName]);
 
             foreach (var sqlColumn in SqlColumns)

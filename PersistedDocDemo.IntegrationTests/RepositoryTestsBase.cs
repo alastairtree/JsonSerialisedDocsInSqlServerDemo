@@ -5,6 +5,9 @@ namespace PersistedDocDemo.IntegrationTests
 {
     public abstract class RepositoryTestsBase<TEntity> where TEntity : new()
     {
+        protected TEntity newItem;
+        protected IRepository<TEntity> repository;
+
         [SetUp]
         public virtual void BeforeEachTest()
         {
@@ -15,10 +18,7 @@ namespace PersistedDocDemo.IntegrationTests
 
         internal abstract IRepository<TEntity> BuildRepository();
 
-        protected TEntity newItem;
-        protected IRepository<TEntity> repository;
-
-        protected abstract TEntity GetNewItem(); 
+        protected abstract TEntity GetNewItem();
 
         [Test]
         public void DeleteAllEntriesTheTable()
@@ -70,13 +70,13 @@ namespace PersistedDocDemo.IntegrationTests
         public void SaveTwiceAndGetAllReturnResults()
         {
             var item1 = GetNewItem();
-            var item2= GetNewItem();
+            var item2 = GetNewItem();
             repository.Save(item1);
             repository.Save(item2);
             var allItems = repository.GetAll();
 
             Assert.AreEqual(2, allItems.Count);
-        }      
+        }
 
         protected abstract object GetId(TEntity item);
     }

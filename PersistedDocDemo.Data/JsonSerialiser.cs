@@ -1,6 +1,5 @@
 ﻿using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace PersistedDocDemo.Data
 {
@@ -9,7 +8,7 @@ namespace PersistedDocDemo.Data
         public JsonSerialiser()
         {
             JsonSerializerSettings = new JsonSerializerSettings();
-            ContractResolver = new IgnorablePropertyCamelCaseNamesContractResolver() {IgnoreSerializableAttribute = false};
+            ContractResolver = new IgnorablePropertyCamelCaseNamesContractResolver {IgnoreSerializableAttribute = false};
             JsonSerializerSettings.ContractResolver = ContractResolver;
         }
 
@@ -28,7 +27,7 @@ namespace PersistedDocDemo.Data
         }
 
         /// <summary>
-        /// Explicitly ignore the given property(s) for the given type
+        ///     Explicitly ignore the given property(s) for the given type
         /// </summary>
         /// <param name="type"></param>
         /// <param name="propertyName">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
