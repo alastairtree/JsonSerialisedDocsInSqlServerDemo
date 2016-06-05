@@ -21,7 +21,7 @@ namespace PersistedDocDemo.IntegrationTests
             base.BeforeEachTest();
             sqlBuilder = new SqlBuilder<TodoEntity>(sqlServerRepository.Config)
             {
-                IdentityFieldName = sqlServerRepository.IdentityFieldName
+                IdentityFieldName = SqlServerRepository<TodoEntity>.IdentityFieldName
             };
             database = new SqlServer {ConnectionString = connectionString};
         }
@@ -57,7 +57,7 @@ namespace PersistedDocDemo.IntegrationTests
 
             var sqlBuilder = new SqlBuilder<TodoEntity>(sqlServerRepository.Config)
             {
-                IdentityFieldName = sqlServerRepository.IdentityFieldName
+                IdentityFieldName = SqlServerRepository<TodoEntity>.IdentityFieldName
             };
             var database = new SqlServer {ConnectionString = connectionString};
 

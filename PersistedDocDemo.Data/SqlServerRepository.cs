@@ -56,19 +56,17 @@ namespace PersistedDocDemo.Data
 
         private void InitIdentityMapping()
         {
-            var identityFieldName = GetIdentityFieldName();
-
             if (!string.IsNullOrEmpty(IdentityFieldName))
             {
                 // ignore the id property compiler generated backing field if needed
                 if (typeof (T).IsSerializable)
                 {
                     var backingFieldDeclaringType = typeof (T).GetMember(IdentityFieldName)[0].DeclaringType;
-                    Serialiser.IgnoreProperty(backingFieldDeclaringType, $"<{identityFieldName}>k__BackingField");
+                    Serialiser.IgnoreProperty(backingFieldDeclaringType, $"<{IdentityFieldName}>k__BackingField");
                 }
                 else
                 {
-                    Serialiser.IgnoreProperty(typeof (T), identityFieldName);
+                    Serialiser.IgnoreProperty(typeof (T), IdentityFieldName);
                 }
             }
 

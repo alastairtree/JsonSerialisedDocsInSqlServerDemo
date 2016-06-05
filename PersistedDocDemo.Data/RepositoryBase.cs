@@ -9,13 +9,12 @@ namespace PersistedDocDemo.Data
 {
     public abstract class RepositoryBase<T> : IRepository<T>
     {
-        protected RepositoryBase()
+        static RepositoryBase()
         {
-            // TODO: Add caching on reflection to get identity
             IdentityFieldName = GetIdentityFieldName();
         }
 
-        public string IdentityFieldName { get; }
+        public static string IdentityFieldName { get; }
         public IEntitySerialiser Serialiser { get; protected set; }
         public abstract T Get(object id);
         public abstract ICollection<T> GetAll();
@@ -93,7 +92,7 @@ namespace PersistedDocDemo.Data
             return lambda.Compile();
         }
 
-        protected string GetIdentityFieldName()
+        protected static string GetIdentityFieldName()
         {
             //try and get by [Key] attributePredicate
             var byAttribute = GetPropertyNameByCustomAttribute<T, KeyAttribute>();
