@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace PersistedDocDemo.IntegrationTests
@@ -25,10 +26,9 @@ namespace PersistedDocDemo.IntegrationTests
         }
 
         [Test]
-        public void GetFromTheRepositoryDeserialisesSucessfully()
+        public void GetFromTheRepositoryDeserialisesPropertiesSucessfully()
         {
             newItem.Name = "testName";
-            newItem.Colour = "Blue";
             repository.Save(newItem);
 
             var id = GetId(newItem);
@@ -36,7 +36,46 @@ namespace PersistedDocDemo.IntegrationTests
 
             Assert.AreEqual("testName", storedValue.Name);
             Assert.AreEqual(id, storedValue.Id);
+        }
+
+        [Test]
+        public void GetFromTheRepositoryHandlesColumnAttributes()
+        {
+            newItem.Colour = "Blue";
+            repository.Save(newItem);
+
+            var id = GetId(newItem);
+            var storedValue = repository.Get(id);
+
             Assert.AreEqual("Blue", storedValue.Colour);
+        }
+
+        [Test]
+        public void GetFromTheRepositoryHandlesColumnAttributeOnListOfStrings()
+        {
+            newItem.Tags = new List<string>(new[] {"Urgent", "Version-1"});
+
+            repository.Save(newItem);
+
+            var id = GetId(newItem);
+            var storedValue = repository.Get(id);
+
+            Assert.AreEqual(2, storedValue.Tags.Count);
+            Assert.AreEqual("Urgent", storedValue.Tags.First());
+            Assert.AreEqual("Version-1", storedValue.Tags.Last());
+        }
+
+        [Test]
+        public void GetFromTheRepositoryHandlesColumnAttributeOnEmptyListOfStrings()
+        {
+            newItem.Tags = new List<string>();
+
+            repository.Save(newItem);
+
+            var id = GetId(newItem);
+            var storedValue = repository.Get(id);
+
+            Assert.AreEqual(0, storedValue.Tags.Count);
         }
 
         [Test]

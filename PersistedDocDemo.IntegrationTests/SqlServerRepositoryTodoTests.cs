@@ -19,10 +19,8 @@ namespace PersistedDocDemo.IntegrationTests
         public override void BeforeEachTest()
         {
             base.BeforeEachTest();
-            sqlBuilder = new SqlBuilder<TodoEntity>(sqlServerRepository.Config)
-            {
-                IdentityFieldName = SqlServerRepository<TodoEntity>.IdentityFieldName
-            };
+            sqlBuilder = new SqlBuilder<TodoEntity>();
+            sqlBuilder.Init(new DefaultRepositoryConfig() { ConnectionString = connectionString }, SqlServerRepository<TodoEntity>.IdentityFieldName);
             database = new SqlServer {ConnectionString = connectionString};
         }
 
@@ -54,12 +52,6 @@ namespace PersistedDocDemo.IntegrationTests
             var item = GetNewItem();
             item.Colour = "Red";
             repository.Save(item);
-
-            var sqlBuilder = new SqlBuilder<TodoEntity>(sqlServerRepository.Config)
-            {
-                IdentityFieldName = SqlServerRepository<TodoEntity>.IdentityFieldName
-            };
-            var database = new SqlServer {ConnectionString = connectionString};
 
             var sql = sqlBuilder.SelectByIdSql();
             var data = database.ExecuteSqlTableQuery(sql, Tuple.Create<string, object>("id", item.Id));

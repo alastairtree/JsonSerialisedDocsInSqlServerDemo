@@ -51,6 +51,7 @@
     <Compile Include="IEntitySerialiser.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IRepositoryConfig.cs" />
+    <Compile Include="ISqlBuilder.cs" />
     <Compile Include="JsonSerialiser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FileRepository.cs" />

@@ -11,6 +11,7 @@ namespace PersistedDocDemo.IntegrationTests
         public Todo()
         {
             ChildTasks = new List<Todo>();
+            Tags = new List<string>();
         }
 
         public int Id { get; set; }
@@ -18,6 +19,9 @@ namespace PersistedDocDemo.IntegrationTests
 
         [SqlColumn]
         public string Colour { get; set; }
+
+        [SqlColumn]
+        public List<string> Tags { get; set; } 
 
         public ICollection<Todo> ChildTasks { get; private set; }
     }

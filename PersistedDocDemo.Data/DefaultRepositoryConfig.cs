@@ -2,7 +2,7 @@ using System.Configuration;
 
 namespace PersistedDocDemo.Data
 {
-    internal class DefaultRepositoryConfig : IRepositoryConfig
+    public class DefaultRepositoryConfig : IRepositoryConfig
     {
         public DefaultRepositoryConfig(string schemaName = "dbo", string connectionString = null)
         {

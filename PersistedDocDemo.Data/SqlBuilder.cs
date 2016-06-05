@@ -1,16 +1,21 @@
+using System;
 using System.Collections.Generic;
 
 namespace PersistedDocDemo.Data
 {
-    public class SqlBuilder<TEntity>
+    public class SqlBuilder<TEntity> : ISqlBuilder<TEntity>
     {
-        private readonly IRepositoryConfig config;
+        private IRepositoryConfig config;
         private string tableName;
 
-        public SqlBuilder(IRepositoryConfig config)
+        public void Init(IRepositoryConfig config, string identityFieldName, Dictionary<string, Type> columnMetadata = null)
         {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (identityFieldName == null) throw new ArgumentNullException(nameof(identityFieldName));
+
             this.config = config;
-            SqlColumns = new List<string>();
+            this.IdentityFieldName = identityFieldName;
+            this.ColumnMetadata = columnMetadata ?? new Dictionary<string, Type>();
         }
 
         public string TableName
@@ -27,7 +32,7 @@ namespace PersistedDocDemo.Data
         }
 
         public string IdentityFieldName { get; set; }
-        public ICollection<string> SqlColumns { get; set; }
+        Dictionary<string, Type> ColumnMetadata { get; set; }
 
         public string SelectByIdSql()
         {
@@ -57,7 +62,7 @@ namespace PersistedDocDemo.Data
             var columnNames = new List<string>();
             if (!surpressId)
                 columnNames.Add(IdentityFieldName);
-            columnNames.AddRange(SqlColumns);
+            columnNames.AddRange(ColumnMetadata.Keys);
             columnNames.Add("Data");
 
             var text = string.Empty;

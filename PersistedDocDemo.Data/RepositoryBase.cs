@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -49,7 +50,9 @@ namespace PersistedDocDemo.Data
 
             var identityValueGetter = CreateLambdaGetter(propertyName);
 
-            return identityValueGetter.Invoke(item);
+            var value = identityValueGetter.Invoke(item);
+
+            return value;
         }
 
         private static Func<T, object> CreateLambdaGetter(string fieldName)

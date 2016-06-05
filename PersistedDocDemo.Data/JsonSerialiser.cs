@@ -5,20 +5,25 @@ namespace PersistedDocDemo.Data
 {
     public class JsonSerialiser : IEntitySerialiser
     {
-        public JsonSerialiser()
+       static JsonSerialiser()
         {
             JsonSerializerSettings = new JsonSerializerSettings();
             ContractResolver = new IgnorablePropertyCamelCaseNamesContractResolver {IgnoreSerializableAttribute = false};
             JsonSerializerSettings.ContractResolver = ContractResolver;
         }
 
-        public IgnorablePropertyCamelCaseNamesContractResolver ContractResolver { get; set; }
+        public static IgnorablePropertyCamelCaseNamesContractResolver ContractResolver { get; set; }
 
-        public JsonSerializerSettings JsonSerializerSettings { set; get; }
+        public static JsonSerializerSettings JsonSerializerSettings { set; get; }
 
         public TEntity DeserializeObject<TEntity>(object data)
         {
             return JsonConvert.DeserializeObject<TEntity>(data.ToString(), JsonSerializerSettings);
+        }
+
+        internal static object DeserializeObject(object data, Type type)
+        {
+            return JsonConvert.DeserializeObject(data.ToString(), type, JsonSerializerSettings);
         }
 
         public object SerializeObject<TEntity>(TEntity item)
