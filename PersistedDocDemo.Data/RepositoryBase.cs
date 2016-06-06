@@ -9,12 +9,12 @@ namespace PersistedDocDemo.Data
 {
     public abstract class RepositoryBase<T> : IRepository<T>
     {
-        static RepositoryBase()
+        public RepositoryBase()
         {
             IdentityFieldName = GetIdentityFieldName();
         }
 
-        public static string IdentityFieldName { get; }
+        public string IdentityFieldName { get; }
         public IEntitySerialiser Serialiser { get; protected set; }
         public abstract T Get(object id);
         public abstract ICollection<T> GetAll();
@@ -49,7 +49,9 @@ namespace PersistedDocDemo.Data
 
             var identityValueGetter = CreateLambdaGetter(propertyName);
 
-            return identityValueGetter.Invoke(item);
+            var value = identityValueGetter.Invoke(item);
+
+            return value;
         }
 
         private static Func<T, object> CreateLambdaGetter(string fieldName)

@@ -5,8 +5,17 @@ using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
 {
-    [TestFixture(typeof (Todo))]
-    [TestFixture(typeof (TodoDecoratedWithSerialisable))]
+    [TestFixture]
+    public class SqlServerRepositoryTodoTests : SqlServerRepositoryTodoTests<Todo>
+    {
+    }
+
+    [TestFixture]
+    public class SqlServerRepositoryTodoDecoratedWithSerialisableTests :
+        SqlServerRepositoryTodoTests<TodoDecoratedWithSerialisable>
+    {
+    }
+
     public class SqlServerRepositoryTodoTests<TodoEntity> : TodoRepositoryTestsBase<TodoEntity>
         where TodoEntity : Todo, new()
     {
@@ -19,10 +28,9 @@ namespace PersistedDocDemo.IntegrationTests
         public override void BeforeEachTest()
         {
             base.BeforeEachTest();
-            sqlBuilder = new SqlBuilder<TodoEntity>(sqlServerRepository.Config)
-            {
-                IdentityFieldName = SqlServerRepository<TodoEntity>.IdentityFieldName
-            };
+            sqlBuilder = new SqlBuilder<TodoEntity>();
+            sqlBuilder.Init(new DefaultRepositoryConfig {ConnectionString = connectionString}, "Id",
+                sqlServerRepository.IndexedColumnMetadata);
             database = new SqlServer {ConnectionString = connectionString};
         }
 
@@ -55,18 +63,28 @@ namespace PersistedDocDemo.IntegrationTests
             item.Colour = "Red";
             repository.Save(item);
 
-            var sqlBuilder = new SqlBuilder<TodoEntity>(sqlServerRepository.Config)
-            {
-                IdentityFieldName = SqlServerRepository<TodoEntity>.IdentityFieldName
-            };
-            var database = new SqlServer {ConnectionString = connectionString};
-
             var sql = sqlBuilder.SelectByIdSql();
             var data = database.ExecuteSqlTableQuery(sql, Tuple.Create<string, object>("id", item.Id));
             var json = data.Rows[0]["data"] as string;
 
             Assert.NotNull(json);
             Assert.False(json.Contains("Red"));
+        }
+
+        [Test]
+        public void SqlColumnDecoratedPropertiesListPropertiesArePipeDelimited()
+        {
+            var item = GetNewItem();
+            item.Tags.Add("Red");
+            item.Tags.Add("Blue");
+            repository.Save(item);
+
+            var sql = sqlBuilder.SelectByIdSql();
+            var data = database.ExecuteSqlTableQuery(sql, Tuple.Create<string, object>("id", item.Id));
+            var tagsText = data.Rows[0]["Tags"] as string;
+
+            Assert.NotNull(tagsText);
+            Assert.AreEqual("|Red|Blue|", tagsText);
         }
     }
 }

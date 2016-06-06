@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
@@ -74,8 +75,11 @@ namespace PersistedDocDemo.IntegrationTests
             repository.Save(item1);
             repository.Save(item2);
             var allItems = repository.GetAll();
+            var ids = allItems.Select(GetId).ToArray();
 
             Assert.AreEqual(2, allItems.Count);
+            Assert.Contains(GetId(item1), ids);
+            Assert.Contains(GetId(item2), ids);
         }
 
         protected abstract object GetId(TEntity item);

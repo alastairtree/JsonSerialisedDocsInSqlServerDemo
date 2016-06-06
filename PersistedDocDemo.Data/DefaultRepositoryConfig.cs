@@ -2,7 +2,7 @@ using System.Configuration;
 
 namespace PersistedDocDemo.Data
 {
-    internal class DefaultRepositoryConfig : IRepositoryConfig
+    public class DefaultRepositoryConfig : IRepositoryConfig
     {
         public DefaultRepositoryConfig(string schemaName = "dbo", string connectionString = null)
         {
@@ -15,6 +15,7 @@ namespace PersistedDocDemo.Data
         public string ConnectionString { get; set; }
 
         public string DatabaseSchemaName { get; set; }
+        public string ColumnItemsDelimeter { get; set; } = "|";
 
         private void TryAndSetADefaultConnectionString()
         {

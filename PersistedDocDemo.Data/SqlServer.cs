@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 
 namespace PersistedDocDemo.Data
 {
@@ -21,6 +22,8 @@ namespace PersistedDocDemo.Data
 
         public int ExecuteNonQuery(string sql, params Tuple<string, object>[] parameters)
         {
+            LogSqL(sql, parameters);
+
             int value;
             using (var conn = new SqlConnection(ConnectionString))
             {
@@ -32,6 +35,8 @@ namespace PersistedDocDemo.Data
 
         public DataTable ExecuteSqlTableQuery(string sql, params Tuple<string, object>[] parameters)
         {
+            LogSqL(sql, parameters);
+
             using (var conn = new SqlConnection(ConnectionString))
             {
                 var command = CreateCommand(sql, parameters, conn);
@@ -42,8 +47,19 @@ namespace PersistedDocDemo.Data
             }
         }
 
+        private static void LogSqL(string sql, Tuple<string, object>[] parameters)
+        {
+            Debug.WriteLine("Executing SQL command: " + sql);
+            foreach (var parameter in parameters)
+            {
+                Debug.WriteLine($"{parameter.Item1} = {parameter.Item2}");
+            }
+        }
+
         private static SqlCommand CreateCommand(string sql, Tuple<string, object>[] parameters, SqlConnection conn)
         {
+            LogSqL(sql, parameters);
+
             var command = new SqlCommand(sql, conn);
 
             if (parameters != null)

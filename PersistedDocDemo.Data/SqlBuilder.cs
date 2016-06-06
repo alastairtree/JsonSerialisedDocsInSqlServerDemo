@@ -1,17 +1,12 @@
+using System;
 using System.Collections.Generic;
 
 namespace PersistedDocDemo.Data
 {
-    public class SqlBuilder<TEntity>
+    public class SqlBuilder<TEntity> : ISqlBuilder<TEntity>
     {
-        private readonly IRepositoryConfig config;
+        private IRepositoryConfig config;
         private string tableName;
-
-        public SqlBuilder(IRepositoryConfig config)
-        {
-            this.config = config;
-            SqlColumns = new List<string>();
-        }
 
         public string TableName
         {
@@ -27,7 +22,18 @@ namespace PersistedDocDemo.Data
         }
 
         public string IdentityFieldName { get; set; }
-        public ICollection<string> SqlColumns { get; set; }
+        private Dictionary<string, Type> ColumnMetadata { get; set; }
+
+        public void Init(IRepositoryConfig config, string identityFieldName,
+            Dictionary<string, Type> columnMetadata = null)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (identityFieldName == null) throw new ArgumentNullException(nameof(identityFieldName));
+
+            this.config = config;
+            IdentityFieldName = identityFieldName;
+            ColumnMetadata = columnMetadata ?? new Dictionary<string, Type>();
+        }
 
         public string SelectByIdSql()
         {
@@ -52,12 +58,22 @@ namespace PersistedDocDemo.Data
             return $"INSERT {TableName} ({sqlColumns}) VALUES ({sqlColumnParams}); SELECT SCOPE_IDENTITY();";
         }
 
+        public string DeleteByIdSql()
+        {
+            return $"DELETE FROM {TableName} WHERE [{IdentityFieldName}] = @id";
+        }
+
+        public string DeleteSql()
+        {
+            return $"DELETE FROM {TableName}";
+        }
+
         private string GenerateColumns(bool surpressId = false, string format = "[{0}]")
         {
             var columnNames = new List<string>();
             if (!surpressId)
                 columnNames.Add(IdentityFieldName);
-            columnNames.AddRange(SqlColumns);
+            columnNames.AddRange(ColumnMetadata.Keys);
             columnNames.Add("Data");
 
             var text = string.Empty;
@@ -71,16 +87,6 @@ namespace PersistedDocDemo.Data
                 }
             }
             return text;
-        }
-
-        public string DeleteByIdSql()
-        {
-            return $"DELETE FROM {TableName} WHERE [{IdentityFieldName}] = @id";
-        }
-
-        public string DeleteSql()
-        {
-            return $"DELETE FROM {TableName}";
         }
     }
 }

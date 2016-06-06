@@ -4,5 +4,7 @@ namespace PersistedDocDemo.Data
     {
         string ConnectionString { get; set; }
         string DatabaseSchemaName { get; set; }
+
+        string ColumnItemsDelimeter { get; set; }
     }
 }
