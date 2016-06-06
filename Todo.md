@@ -1,8 +1,10 @@
 # Potential features to add
 
-Handle [SqlColumn] on enumerable types
-* pipe seperated values
-* or dynamic table?
+Handle [SqlColumn] on enumerable types as pipe seperated values
+
+
+Handle [SqlColumn] on enumerable types as optional extra table. use attribute to swap between behaviours 
+
 
 
 

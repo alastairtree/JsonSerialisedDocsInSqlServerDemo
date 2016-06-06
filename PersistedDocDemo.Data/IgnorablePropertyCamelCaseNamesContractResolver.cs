@@ -9,7 +9,7 @@ namespace PersistedDocDemo.Data
     /// <summary>
     ///     Special JsonConvert resolver that allows you to ignore properties.  See http://stackoverflow.com/a/13588192/1037948
     /// </summary>
-    public class IgnorablePropertyCamelCaseNamesContractResolver : CamelCasePropertyNamesContractResolver
+    public class IgnorablePropertyCamelCaseNamesContractResolver : DefaultContractResolver
     {
         protected readonly Dictionary<Type, HashSet<string>> Ignores;
 
@@ -68,10 +68,19 @@ namespace PersistedDocDemo.Data
                 // need to check basetype as well for EF -- @per comment by user576838
                 || IsIgnored(property.DeclaringType.BaseType, property.PropertyName))
             {
-                property.ShouldSerialize = instance => { return false; };
+                property.ShouldSerialize = instance => false;
             }
 
+
+            CamelCasePropertyNames(property);
+
             return property;
+        }
+
+        private static void CamelCasePropertyNames(JsonProperty property)
+        {
+            property.PropertyName = property.PropertyName[0].ToString().ToLower()
+                                    + property.PropertyName.Substring(1, property.PropertyName.Length - 1);
         }
     }
 }

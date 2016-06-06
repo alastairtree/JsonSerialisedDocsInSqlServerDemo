@@ -10,12 +10,12 @@ namespace PersistedDocDemo.Data
 {
     public abstract class RepositoryBase<T> : IRepository<T>
     {
-        static RepositoryBase()
+        public RepositoryBase()
         {
             IdentityFieldName = GetIdentityFieldName();
         }
 
-        public static string IdentityFieldName { get; }
+        public string IdentityFieldName { get; }
         public IEntitySerialiser Serialiser { get; protected set; }
         public abstract T Get(object id);
         public abstract ICollection<T> GetAll();

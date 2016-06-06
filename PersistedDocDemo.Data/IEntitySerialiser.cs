@@ -11,7 +11,7 @@ namespace PersistedDocDemo.Data
         ///     Explicitly ignore the given property(s) for the given type
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="propertyName">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
-        void IgnoreProperty(Type type, params string[] propertyName);
+        /// <param name="propertyNames">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
+        void IgnoreProperty(Type type, params string[] propertyNames);
     }
 }

@@ -4,8 +4,13 @@ using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
 {
-    [TestFixture(typeof (Todo))]
-    [TestFixture(typeof (TodoDecoratedWithSerialisable))]
+
+    [TestFixture]
+    public class FileRepositoryTodoTests : FileRepositortyTests<Todo> { }
+
+    [TestFixture]
+    public class FileRepositoryTodoDecoratedWithSerialisableTests : FileRepositortyTests<TodoDecoratedWithSerialisable> { }
+
     public class FileRepositortyTests<TodoEntity> : TodoRepositoryTestsBase<TodoEntity> where TodoEntity : Todo, new()
     {
         private readonly Random rand;

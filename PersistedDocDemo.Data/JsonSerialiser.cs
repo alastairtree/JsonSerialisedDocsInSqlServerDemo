@@ -1,44 +1,103 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace PersistedDocDemo.Data
 {
     public class JsonSerialiser : IEntitySerialiser
     {
-       static JsonSerialiser()
+        private List<Tuple<Type, string[]>> ignored;
+
+        public JsonSerialiser()
         {
-            JsonSerializerSettings = new JsonSerializerSettings();
-            ContractResolver = new IgnorablePropertyCamelCaseNamesContractResolver {IgnoreSerializableAttribute = false};
-            JsonSerializerSettings.ContractResolver = ContractResolver;
+            this.ignored = new List<Tuple<Type, string[]>>();
         }
 
-        public static IgnorablePropertyCamelCaseNamesContractResolver ContractResolver { get; set; }
+        IgnorablePropertyCamelCaseNamesContractResolver ContractResolver { get; }
 
-        public static JsonSerializerSettings JsonSerializerSettings { set; get; }
+        JsonSerializerSettings SerialiserSettings { get; }
 
         public TEntity DeserializeObject<TEntity>(object data)
         {
-            return JsonConvert.DeserializeObject<TEntity>(data.ToString(), JsonSerializerSettings);
+            var serialiser = GetNewJsonSerializer();
+
+            using (var reader = new JsonTextReader(new StringReader(data.ToString())))
+            {
+                return serialiser.Deserialize<TEntity>(reader);
+            }
+
+            return JsonConvert.DeserializeObject<TEntity>(data.ToString(), SerialiserSettings);
         }
 
-        internal static object DeserializeObject(object data, Type type)
+        internal object DeserializeObject(object data, Type type)
         {
-            return JsonConvert.DeserializeObject(data.ToString(), type, JsonSerializerSettings);
+            var serialiser = GetNewJsonSerializer();
+
+            using (var reader = new JsonTextReader(new StringReader(data.ToString())))
+            {
+                return serialiser.Deserialize(reader, type);
+            }
+
+
+            return JsonConvert.DeserializeObject(data.ToString(), type, SerialiserSettings);
         }
 
+        object lockObj = new object();
         public object SerializeObject<TEntity>(TEntity item)
         {
-            return JsonConvert.SerializeObject(item, JsonSerializerSettings);
+            lock (lockObj)
+            {
+                var serialiser = GetNewJsonSerializer();
+
+
+                StringBuilder sb = new StringBuilder(256);
+                StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
+                using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
+                {
+                    jsonWriter.Formatting = serialiser.Formatting;
+
+                    serialiser.Serialize(jsonWriter, item);
+                }
+
+                return sb.ToString();
+            }
+
+
+            return JsonConvert.SerializeObject(item, SerialiserSettings);
+        }
+
+        private JsonSerializer GetNewJsonSerializer()
+        {
+            var resolver = new IgnorablePropertyCamelCaseNamesContractResolver
+            {
+                IgnoreSerializableAttribute = false
+            };
+            foreach (var item in ignored)
+            {
+                resolver.Ignore(item.Item1, item.Item2);
+            }
+            var serialiser = new Newtonsoft.Json.JsonSerializer
+            {
+                ContractResolver = resolver
+            };
+
+            return serialiser;
         }
 
         /// <summary>
         ///     Explicitly ignore the given property(s) for the given type
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="propertyName">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
-        public void IgnoreProperty(Type type, params string[] propertyName)
+        /// <param name="propertyNames">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
+        public void IgnoreProperty(Type type, params string[] propertyNames)
         {
-            ContractResolver.Ignore(type, propertyName);
+            Debug.WriteLine("jsonserialiser ignoring " + type.Name + "" + string.Join(" ", propertyNames)); 
+           ignored.Add(Tuple.Create(type, propertyNames));
         }
     }
 }

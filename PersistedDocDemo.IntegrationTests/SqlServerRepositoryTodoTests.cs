@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Collections;
 using System.Configuration;
 using NUnit.Framework;
 using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
 {
-    [TestFixture(typeof (Todo))]
-    [TestFixture(typeof (TodoDecoratedWithSerialisable))]
+    [TestFixture]
+    public class SqlServerRepositoryTodoTests : SqlServerRepositoryTodoTests<Todo> { }
+
+    [TestFixture]
+    public class SqlServerRepositoryTodoDecoratedWithSerialisableTests : SqlServerRepositoryTodoTests<TodoDecoratedWithSerialisable> { }
+
     public class SqlServerRepositoryTodoTests<TodoEntity> : TodoRepositoryTestsBase<TodoEntity>
         where TodoEntity : Todo, new()
     {
+
         private string connectionString;
         private SqlServer database;
         private SqlBuilder<TodoEntity> sqlBuilder;
@@ -20,8 +26,8 @@ namespace PersistedDocDemo.IntegrationTests
         {
             base.BeforeEachTest();
             sqlBuilder = new SqlBuilder<TodoEntity>();
-            sqlBuilder.Init(new DefaultRepositoryConfig() { ConnectionString = connectionString }, SqlServerRepository<TodoEntity>.IdentityFieldName);
-            database = new SqlServer {ConnectionString = connectionString};
+            sqlBuilder.Init(new DefaultRepositoryConfig() { ConnectionString = connectionString }, "Id");
+            database = new SqlServer { ConnectionString = connectionString };
         }
 
         internal override IRepository<TodoEntity> BuildRepository()
@@ -60,5 +66,6 @@ namespace PersistedDocDemo.IntegrationTests
             Assert.NotNull(json);
             Assert.False(json.Contains("Red"));
         }
+
     }
-}
+}   

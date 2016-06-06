@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -12,17 +13,15 @@ namespace PersistedDocDemo.Data
     {
         private readonly IDatabase database;
         private readonly ISqlBuilder<T> sqlBuilder;
-        private static readonly List<string> CollectionColumns = new List<string>();
-        private static Dictionary<string, Type> indexedColumnsInfo = null;
+        private readonly List<string> CollectionColumns = new List<string>();
+        private Dictionary<string, Type> indexedColumnsInfo = null;
         private static string delimiter = "|";
 
-        static SqlServerRepository()
-        {
-            InitColumnMapping();
-        }
 
         public SqlServerRepository(IEntitySerialiser serialiser, IRepositoryConfig config, IDatabase database, ISqlBuilder<T> sqlBuilder)
         {
+            InitColumnMapping();
+
             this.database = database;
             Serialiser = serialiser;
             Config = config;
@@ -46,49 +45,60 @@ namespace PersistedDocDemo.Data
 
         public IRepositoryConfig Config { get; }
 
-        private static void InitColumnMapping()
+        private void InitColumnMapping()
         {
-            var columnNames = GetPropertyNameByCustomAttribute<T, SqlColumnAttribute>() ?? new string[0];
-            indexedColumnsInfo = columnNames.ToDictionary(x => x, GetMemberType);
-
-            foreach (var columnName in indexedColumnsInfo.Keys)
+            if (indexedColumnsInfo == null)
             {
-                var actualType = indexedColumnsInfo[columnName];
-                if (IsEnumerable(actualType) && actualType != typeof(string))
+                var type = typeof (T).FullName;
+                var columnNames = GetPropertyNameByCustomAttribute<T, SqlColumnAttribute>() ?? new string[0];
+                indexedColumnsInfo = columnNames.ToDictionary(x => x, GetMemberType);
+
+                foreach (var columnName in indexedColumnsInfo.Keys)
                 {
-                    CollectionColumns.Add(columnName);
+                    var actualType = indexedColumnsInfo[columnName];
+
+                    Debug.WriteLine($"{type} column mapping for {columnName} is {actualType.FullName}");
+
+                    if (IsEnumerable(actualType) && actualType != typeof (string))
+                    {
+                        CollectionColumns.Add(columnName);
+                        Debug.Write(" and is enumerable");
+                    }
                 }
             }
         }
 
         private void InitSerialiser()
         {
+            if(indexedColumnsInfo == null) throw new NotSupportedException("Mapping has not been set up");
+
             if (!string.IsNullOrEmpty(IdentityFieldName))
             {
                 // ignore the id property compiler generated backing field if needed
-                if (typeof(T).IsSerializable)
-                {
-                    var backingFieldDeclaringType = typeof(T).GetMember(IdentityFieldName)[0].DeclaringType;
-                    Serialiser.IgnoreProperty(backingFieldDeclaringType, $"<{IdentityFieldName}>k__BackingField");
-                }
-                else
-                {
-                    Serialiser.IgnoreProperty(typeof(T), IdentityFieldName);
-                }
+                IgnoreProperty(IdentityFieldName);
             }
 
             //ignore properties stored in proper columns
             foreach (var sqlColumn in indexedColumnsInfo.Keys)
             {
-                var memberInfo = typeof(T).GetMember(sqlColumn)[0];
-                if (typeof(T).IsSerializable) //we need to ignore the backing field 
-                {
-                    Serialiser.IgnoreProperty(memberInfo.DeclaringType, $"<{sqlColumn}>k__BackingField");
-                }
-                else //otherwise just ignore the property
-                {
-                    Serialiser.IgnoreProperty(typeof(T), sqlColumn);
-                }
+                IgnoreProperty(sqlColumn);
+            }
+        }
+
+        private void IgnoreProperty(string sqlColumn)
+        {
+            if (typeof (T).IsSerializable) //we need to ignore the backing field 
+            {
+                var backingFieldDeclaringType = typeof(T).GetMember(sqlColumn)[0].DeclaringType;
+                Serialiser.IgnoreProperty(backingFieldDeclaringType, $"<{sqlColumn}>k__BackingField");
+                Debug.WriteLine($"Instruction serialiser to ignore property {$"<{sqlColumn}>k__BackingField"} on type { backingFieldDeclaringType }");
+
+            }
+            else //otherwise just ignore the property
+            {
+                Serialiser.IgnoreProperty(typeof (T), sqlColumn);
+                Debug.WriteLine($"Instructing serialiser to ignore property {sqlColumn} on type { typeof(T).Name }");
+
             }
         }
 
@@ -163,7 +173,7 @@ namespace PersistedDocDemo.Data
                     valuesAsJson = "[\"" + values.Replace(delimiter, "\",\"") + "\"]";
 
 
-                var enumerableColumnValue = JsonSerialiser.DeserializeObject(valuesAsJson,
+                var enumerableColumnValue = new JsonSerialiser().DeserializeObject(valuesAsJson,
                     indexedColumnsInfo[enumerableColumn]);
 
                 SetProperty(value, enumerableColumn, enumerableColumnValue);
@@ -214,7 +224,9 @@ namespace PersistedDocDemo.Data
 
                 parameters.Add(Tuple.Create(sqlColumn,value));
             }
+
             parameters.Add(Tuple.Create("Data", serialisedData));
+
 
             id = database.ExecuteSqlScalar(sql, parameters.ToArray()) ?? id;
 
