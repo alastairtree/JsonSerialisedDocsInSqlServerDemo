@@ -14,8 +14,7 @@ namespace PersistedDocDemo.Data
         private readonly IDatabase database;
         private readonly ISqlBuilder<T> sqlBuilder;
         private readonly List<string> CollectionColumns = new List<string>();
-        private Dictionary<string, Type> indexedColumnsInfo = null;
-        private static string delimiter = "|";
+        private Dictionary<string, Type> indexedColumnMetadata = null;
 
 
         public SqlServerRepository(IEntitySerialiser serialiser, IRepositoryConfig config, IDatabase database, ISqlBuilder<T> sqlBuilder)
@@ -27,7 +26,7 @@ namespace PersistedDocDemo.Data
             Config = config;
 
             this.sqlBuilder = sqlBuilder;
-            sqlBuilder.Init(Config,IdentityFieldName,indexedColumnsInfo);
+            sqlBuilder.Init(Config,IdentityFieldName,indexedColumnMetadata);
             InitSerialiser();
 
         }
@@ -45,17 +44,22 @@ namespace PersistedDocDemo.Data
 
         public IRepositoryConfig Config { get; }
 
+        public Dictionary<string, Type> IndexedColumnMetadata
+        {
+            get { return indexedColumnMetadata; }
+        }
+
         private void InitColumnMapping()
         {
-            if (indexedColumnsInfo == null)
+            if (indexedColumnMetadata == null)
             {
                 var type = typeof (T).FullName;
                 var columnNames = GetPropertyNameByCustomAttribute<T, SqlColumnAttribute>() ?? new string[0];
-                indexedColumnsInfo = columnNames.ToDictionary(x => x, GetMemberType);
+                indexedColumnMetadata = columnNames.ToDictionary(x => x, GetMemberType);
 
-                foreach (var columnName in indexedColumnsInfo.Keys)
+                foreach (var columnName in indexedColumnMetadata.Keys)
                 {
-                    var actualType = indexedColumnsInfo[columnName];
+                    var actualType = indexedColumnMetadata[columnName];
 
                     Debug.WriteLine($"{type} column mapping for {columnName} is {actualType.FullName}");
 
@@ -70,7 +74,7 @@ namespace PersistedDocDemo.Data
 
         private void InitSerialiser()
         {
-            if(indexedColumnsInfo == null) throw new NotSupportedException("Mapping has not been set up");
+            if(indexedColumnMetadata == null) throw new NotSupportedException("Mapping has not been set up");
 
             if (!string.IsNullOrEmpty(IdentityFieldName))
             {
@@ -79,7 +83,7 @@ namespace PersistedDocDemo.Data
             }
 
             //ignore properties stored in proper columns
-            foreach (var sqlColumn in indexedColumnsInfo.Keys)
+            foreach (var sqlColumn in indexedColumnMetadata.Keys)
             {
                 IgnoreProperty(sqlColumn);
             }
@@ -156,25 +160,25 @@ namespace PersistedDocDemo.Data
             if (value != null)
                 SetIdentity(value, row[IdentityFieldName]);
 
-            foreach (var nonEnumerableColumn in indexedColumnsInfo.Keys.Except(CollectionColumns))
+            foreach (var nonEnumerableColumn in indexedColumnMetadata.Keys.Except(CollectionColumns))
             {
                 SetProperty(value, nonEnumerableColumn, row[nonEnumerableColumn]);
             }
 
-            foreach (var enumerableColumn in indexedColumnsInfo.Keys.Intersect(CollectionColumns))
+            foreach (var enumerableColumn in indexedColumnMetadata.Keys.Intersect(CollectionColumns))
             {
-                var values = row[enumerableColumn].ToString();
+                var values = row[enumerableColumn].ToString().Trim(Config.ColumnItemsDelimeter.ToCharArray());
 
                 var areNumbers = Regex.IsMatch(@"(\d+,?)+", values);
                 var valuesAsJson = "";
                 if (areNumbers)
-                    valuesAsJson = "[" +values.Replace(delimiter, ",")  + "]";
+                    valuesAsJson = "[" +values.Replace(Config.ColumnItemsDelimeter, ",")  + "]";
                 else
-                    valuesAsJson = "[\"" + values.Replace(delimiter, "\",\"") + "\"]";
+                    valuesAsJson = "[\"" + values.Replace(Config.ColumnItemsDelimeter, "\",\"") + "\"]";
 
 
                 var enumerableColumnValue = new JsonSerialiser().DeserializeObject(valuesAsJson,
-                    indexedColumnsInfo[enumerableColumn]);
+                    indexedColumnMetadata[enumerableColumn]);
 
                 SetProperty(value, enumerableColumn, enumerableColumnValue);
             }
@@ -216,7 +220,7 @@ namespace PersistedDocDemo.Data
             var serialisedData = Serialiser.SerializeObject(item);
 
             var parameters = new List<Tuple<string, object>>();
-            foreach (var sqlColumn in indexedColumnsInfo.Keys)
+            foreach (var sqlColumn in indexedColumnMetadata.Keys)
             {
                 var value = GetValueFromProperty(item, sqlColumn) ?? DBNull.Value;
 
@@ -255,7 +259,7 @@ namespace PersistedDocDemo.Data
             return rows > 0;
         }
 
-        private static object ConvertCollectionsToText(object value)
+        private object ConvertCollectionsToText(object value)
         {
             var enumerable = value as ICollection;
             if (enumerable != null)
@@ -263,8 +267,8 @@ namespace PersistedDocDemo.Data
                 if (enumerable.Count > 0)
                 {
                     //convert the value into a pipe seperated string
-                    value = string.Join(delimiter, enumerable.Cast<object>()
-                        .Select(x => x.ToString()));
+                    value = Config.ColumnItemsDelimeter +  string.Join(Config.ColumnItemsDelimeter, enumerable.Cast<object>()
+                        .Select(x => x.ToString())) + Config.ColumnItemsDelimeter;
                 }
                 else
                 {

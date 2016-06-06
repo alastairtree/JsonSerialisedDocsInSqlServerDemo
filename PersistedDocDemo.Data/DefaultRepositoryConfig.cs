@@ -15,6 +15,7 @@ namespace PersistedDocDemo.Data
         public string ConnectionString { get; set; }
 
         public string DatabaseSchemaName { get; set; }
+        public string ColumnItemsDelimeter { get; set; } = "|";
 
         private void TryAndSetADefaultConnectionString()
         {

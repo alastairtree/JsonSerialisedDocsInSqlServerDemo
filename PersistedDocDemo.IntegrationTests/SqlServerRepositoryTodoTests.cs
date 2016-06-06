@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Configuration;
 using NUnit.Framework;
 using PersistedDocDemo.Data;
@@ -7,15 +6,19 @@ using PersistedDocDemo.Data;
 namespace PersistedDocDemo.IntegrationTests
 {
     [TestFixture]
-    public class SqlServerRepositoryTodoTests : SqlServerRepositoryTodoTests<Todo> { }
+    public class SqlServerRepositoryTodoTests : SqlServerRepositoryTodoTests<Todo>
+    {
+    }
 
     [TestFixture]
-    public class SqlServerRepositoryTodoDecoratedWithSerialisableTests : SqlServerRepositoryTodoTests<TodoDecoratedWithSerialisable> { }
+    public class SqlServerRepositoryTodoDecoratedWithSerialisableTests :
+        SqlServerRepositoryTodoTests<TodoDecoratedWithSerialisable>
+    {
+    }
 
     public class SqlServerRepositoryTodoTests<TodoEntity> : TodoRepositoryTestsBase<TodoEntity>
         where TodoEntity : Todo, new()
     {
-
         private string connectionString;
         private SqlServer database;
         private SqlBuilder<TodoEntity> sqlBuilder;
@@ -26,8 +29,9 @@ namespace PersistedDocDemo.IntegrationTests
         {
             base.BeforeEachTest();
             sqlBuilder = new SqlBuilder<TodoEntity>();
-            sqlBuilder.Init(new DefaultRepositoryConfig() { ConnectionString = connectionString }, "Id");
-            database = new SqlServer { ConnectionString = connectionString };
+            sqlBuilder.Init(new DefaultRepositoryConfig {ConnectionString = connectionString}, "Id",
+                sqlServerRepository.IndexedColumnMetadata);
+            database = new SqlServer {ConnectionString = connectionString};
         }
 
         internal override IRepository<TodoEntity> BuildRepository()
@@ -67,5 +71,20 @@ namespace PersistedDocDemo.IntegrationTests
             Assert.False(json.Contains("Red"));
         }
 
+        [Test]
+        public void SqlColumnDecoratedPropertiesListPropertiesArePipeDelimited()
+        {
+            var item = GetNewItem();
+            item.Tags.Add("Red");
+            item.Tags.Add("Blue");
+            repository.Save(item);
+
+            var sql = sqlBuilder.SelectByIdSql();
+            var data = database.ExecuteSqlTableQuery(sql, Tuple.Create<string, object>("id", item.Id));
+            var tagsText = data.Rows[0]["Tags"] as string;
+
+            Assert.NotNull(tagsText);
+            Assert.AreEqual("|Red|Blue|", tagsText);
+        }
     }
-}   
+}
