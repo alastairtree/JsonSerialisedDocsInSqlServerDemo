@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -11,16 +9,16 @@ namespace PersistedDocDemo.Data
 {
     public class JsonSerialiser : IEntitySerialiser
     {
-        private List<Tuple<Type, string[]>> ignored;
+        private readonly List<Tuple<Type, string[]>> ignored;
+
+        private readonly object lockObj = new object();
 
         public JsonSerialiser()
         {
-            this.ignored = new List<Tuple<Type, string[]>>();
+            ignored = new List<Tuple<Type, string[]>>();
         }
 
-        IgnorablePropertyCamelCaseNamesContractResolver ContractResolver { get; }
-
-        JsonSerializerSettings SerialiserSettings { get; }
+        private JsonSerializerSettings SerialiserSettings { get; }
 
         public TEntity DeserializeObject<TEntity>(object data)
         {
@@ -30,8 +28,32 @@ namespace PersistedDocDemo.Data
             {
                 return serialiser.Deserialize<TEntity>(reader);
             }
+        }
 
-            return JsonConvert.DeserializeObject<TEntity>(data.ToString(), SerialiserSettings);
+        public object SerializeObject<TEntity>(TEntity item)
+        {
+            var serialiser = GetNewJsonSerializer();
+
+            var sb = new StringBuilder(256);
+            var sw = new StringWriter(sb, CultureInfo.InvariantCulture);
+            using (var jsonWriter = new JsonTextWriter(sw))
+            {
+                jsonWriter.Formatting = serialiser.Formatting;
+
+                serialiser.Serialize(jsonWriter, item);
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     Explicitly ignore the given property(s) for the given type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="propertyNames">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
+        public void IgnoreProperty(Type type, params string[] propertyNames)
+        {
+            ignored.Add(Tuple.Create(type, propertyNames));
         }
 
         internal object DeserializeObject(object data, Type type)
@@ -42,35 +64,9 @@ namespace PersistedDocDemo.Data
             {
                 return serialiser.Deserialize(reader, type);
             }
-
-
-            return JsonConvert.DeserializeObject(data.ToString(), type, SerialiserSettings);
         }
 
-        object lockObj = new object();
-        public object SerializeObject<TEntity>(TEntity item)
-        {
-            lock (lockObj)
-            {
-                var serialiser = GetNewJsonSerializer();
-
-
-                StringBuilder sb = new StringBuilder(256);
-                StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
-                using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
-                {
-                    jsonWriter.Formatting = serialiser.Formatting;
-
-                    serialiser.Serialize(jsonWriter, item);
-                }
-
-                return sb.ToString();
-            }
-
-
-            return JsonConvert.SerializeObject(item, SerialiserSettings);
-        }
-
+        //we contruct our own jsonSerialiser because JsonConvert has some issues with the contract resolvers and concurrency meaning ignored properties get dropped
         private JsonSerializer GetNewJsonSerializer()
         {
             var resolver = new IgnorablePropertyCamelCaseNamesContractResolver
@@ -81,23 +77,12 @@ namespace PersistedDocDemo.Data
             {
                 resolver.Ignore(item.Item1, item.Item2);
             }
-            var serialiser = new Newtonsoft.Json.JsonSerializer
+            var serialiser = new JsonSerializer
             {
                 ContractResolver = resolver
             };
 
             return serialiser;
-        }
-
-        /// <summary>
-        ///     Explicitly ignore the given property(s) for the given type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="propertyNames">one or more properties to ignore.  Leave empty to ignore the type entirely.</param>
-        public void IgnoreProperty(Type type, params string[] propertyNames)
-        {
-            Debug.WriteLine("jsonserialiser ignoring " + type.Name + "" + string.Join(" ", propertyNames)); 
-           ignored.Add(Tuple.Create(type, propertyNames));
         }
     }
 }

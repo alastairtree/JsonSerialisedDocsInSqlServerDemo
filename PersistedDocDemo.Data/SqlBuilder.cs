@@ -8,16 +8,6 @@ namespace PersistedDocDemo.Data
         private IRepositoryConfig config;
         private string tableName;
 
-        public void Init(IRepositoryConfig config, string identityFieldName, Dictionary<string, Type> columnMetadata = null)
-        {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (identityFieldName == null) throw new ArgumentNullException(nameof(identityFieldName));
-
-            this.config = config;
-            this.IdentityFieldName = identityFieldName;
-            this.ColumnMetadata = columnMetadata ?? new Dictionary<string, Type>();
-        }
-
         public string TableName
         {
             get
@@ -32,7 +22,18 @@ namespace PersistedDocDemo.Data
         }
 
         public string IdentityFieldName { get; set; }
-        Dictionary<string, Type> ColumnMetadata { get; set; }
+        private Dictionary<string, Type> ColumnMetadata { get; set; }
+
+        public void Init(IRepositoryConfig config, string identityFieldName,
+            Dictionary<string, Type> columnMetadata = null)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (identityFieldName == null) throw new ArgumentNullException(nameof(identityFieldName));
+
+            this.config = config;
+            IdentityFieldName = identityFieldName;
+            ColumnMetadata = columnMetadata ?? new Dictionary<string, Type>();
+        }
 
         public string SelectByIdSql()
         {
@@ -57,6 +58,16 @@ namespace PersistedDocDemo.Data
             return $"INSERT {TableName} ({sqlColumns}) VALUES ({sqlColumnParams}); SELECT SCOPE_IDENTITY();";
         }
 
+        public string DeleteByIdSql()
+        {
+            return $"DELETE FROM {TableName} WHERE [{IdentityFieldName}] = @id";
+        }
+
+        public string DeleteSql()
+        {
+            return $"DELETE FROM {TableName}";
+        }
+
         private string GenerateColumns(bool surpressId = false, string format = "[{0}]")
         {
             var columnNames = new List<string>();
@@ -76,16 +87,6 @@ namespace PersistedDocDemo.Data
                 }
             }
             return text;
-        }
-
-        public string DeleteByIdSql()
-        {
-            return $"DELETE FROM {TableName} WHERE [{IdentityFieldName}] = @id";
-        }
-
-        public string DeleteSql()
-        {
-            return $"DELETE FROM {TableName}";
         }
     }
 }

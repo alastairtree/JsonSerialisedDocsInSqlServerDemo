@@ -33,15 +33,6 @@ namespace PersistedDocDemo.Data
             return value;
         }
 
-        private static void LogSqL(string sql, Tuple<string, object>[] parameters)
-        {
-            Debug.WriteLine("Executing SQL command: " + sql);
-            foreach (var parameter in parameters)
-            {
-                Debug.WriteLine($"{parameter.Item1} = {parameter.Item2}");
-            }
-        }
-
         public DataTable ExecuteSqlTableQuery(string sql, params Tuple<string, object>[] parameters)
         {
             LogSqL(sql, parameters);
@@ -53,6 +44,15 @@ namespace PersistedDocDemo.Data
                 var dataTable = new DataTable();
                 adapter.Fill(dataTable);
                 return dataTable;
+            }
+        }
+
+        private static void LogSqL(string sql, Tuple<string, object>[] parameters)
+        {
+            Debug.WriteLine("Executing SQL command: " + sql);
+            foreach (var parameter in parameters)
+            {
+                Debug.WriteLine($"{parameter.Item1} = {parameter.Item2}");
             }
         }
 

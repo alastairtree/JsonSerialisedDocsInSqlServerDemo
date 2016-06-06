@@ -1,4 +1,3 @@
-using System;
 using NUnit.Framework;
 using PersistedDocDemo.Data;
 
@@ -7,24 +6,16 @@ namespace PersistedDocDemo.IntegrationTests
     [TestFixture]
     public class JsonSerialiserTests
     {
-        private JsonSerialiser jsonSerialiser;
-
         [SetUp]
         public void JsonSerialiserTestsSetup()
         {
             jsonSerialiser = new JsonSerialiser();
         }
 
+        private JsonSerialiser jsonSerialiser;
+
         public string SimpleProperty { get; set; }
         public int Id { get; set; }
-
-        [Test]
-        public void SerialiseAndDeserialiseSimplePoco()
-        {
-            var entity = new JsonSerialiserTests {SimpleProperty = "123"};
-            var deserialisedEntity = jsonSerialiser.DeserializeObject<JsonSerialiserTests>(jsonSerialiser.SerializeObject(entity));
-            Assert.AreEqual("123", deserialisedEntity.SimpleProperty);
-        }
 
         [Test]
         public void IdColumnsDoNotGetSerialisedWhenIgnored()
@@ -38,10 +29,10 @@ namespace PersistedDocDemo.IntegrationTests
         [Test]
         public void ItsOkToIgnoreMultipleProperties()
         {
-            jsonSerialiser.IgnoreProperty(typeof(JsonSerialiserTests), "Id");
-            jsonSerialiser.IgnoreProperty(typeof(JsonSerialiserTests), "SimpleProperty");
+            jsonSerialiser.IgnoreProperty(typeof (JsonSerialiserTests), "Id");
+            jsonSerialiser.IgnoreProperty(typeof (JsonSerialiserTests), "SimpleProperty");
 
-            var entity = new JsonSerialiserTests { SimpleProperty = "123", Id = 1 };
+            var entity = new JsonSerialiserTests {SimpleProperty = "123", Id = 1};
             var text = jsonSerialiser.SerializeObject(entity);
             Assert.AreEqual("{}", text);
         }
@@ -49,11 +40,20 @@ namespace PersistedDocDemo.IntegrationTests
         [Test]
         public void ItsOkToIgnoreMultiplePropertiesInOneGo()
         {
-            jsonSerialiser.IgnoreProperty(typeof(JsonSerialiserTests), "Id", "SimpleProperty");
+            jsonSerialiser.IgnoreProperty(typeof (JsonSerialiserTests), "Id", "SimpleProperty");
 
-            var entity = new JsonSerialiserTests { SimpleProperty = "123", Id = 1 };
+            var entity = new JsonSerialiserTests {SimpleProperty = "123", Id = 1};
             var text = jsonSerialiser.SerializeObject(entity);
             Assert.AreEqual("{}", text);
+        }
+
+        [Test]
+        public void SerialiseAndDeserialiseSimplePoco()
+        {
+            var entity = new JsonSerialiserTests {SimpleProperty = "123"};
+            var deserialisedEntity =
+                jsonSerialiser.DeserializeObject<JsonSerialiserTests>(jsonSerialiser.SerializeObject(entity));
+            Assert.AreEqual("123", deserialisedEntity.SimpleProperty);
         }
     }
 }

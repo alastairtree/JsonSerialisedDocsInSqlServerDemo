@@ -21,7 +21,7 @@ namespace PersistedDocDemo.IntegrationTests
         public string Colour { get; set; }
 
         [SqlColumn]
-        public List<string> Tags { get; set; } 
+        public List<string> Tags { get; set; }
 
         public ICollection<Todo> ChildTasks { get; private set; }
     }

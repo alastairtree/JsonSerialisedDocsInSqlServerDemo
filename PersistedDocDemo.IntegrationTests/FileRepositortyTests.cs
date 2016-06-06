@@ -4,12 +4,15 @@ using PersistedDocDemo.Data;
 
 namespace PersistedDocDemo.IntegrationTests
 {
+    [TestFixture]
+    public class FileRepositoryTodoTests : FileRepositortyTests<Todo>
+    {
+    }
 
     [TestFixture]
-    public class FileRepositoryTodoTests : FileRepositortyTests<Todo> { }
-
-    [TestFixture]
-    public class FileRepositoryTodoDecoratedWithSerialisableTests : FileRepositortyTests<TodoDecoratedWithSerialisable> { }
+    public class FileRepositoryTodoDecoratedWithSerialisableTests : FileRepositortyTests<TodoDecoratedWithSerialisable>
+    {
+    }
 
     public class FileRepositortyTests<TodoEntity> : TodoRepositoryTestsBase<TodoEntity> where TodoEntity : Todo, new()
     {
