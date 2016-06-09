@@ -1,16 +1,13 @@
-# Potential features to add
+#New features to add (in no particular order)
 
-Handle [SqlColumn] on enumerable types as pipe seperated values
-
-
-Handle [SqlColumn] on enumerable types as optional extra table. use attribute to swap between behaviours 
+<del>Handle [SqlColumn] on enumerable types as pipe seperated values</del> Done 
 
 
+**ID generation**
 
-
-ID generation
-
-* using something like the hi-lo algorithm
+* allow clients to generate IDs
+* Faster/moe flexible that than tsql IDENTITY()
+* could using something like the hi-lo algorithm or bulk key allocation
 * get a range of keys in batches. kep allocations in another table? 
 * ideally keys would be sequntial ints for performance
 * could use a string and put typename in the key with an int value
@@ -18,10 +15,19 @@ ID generation
 * need way that works for sql and files etc
 
 
-Support simple where clause generator/query by column name
-like this?:
-```
+**[SqlColumn] on enumerable supports database table**
+* as an option. enable consumers to swap between behaviours.
+* must be better than pipe delimited way as of now?
+* triggers? or generate extra  SQL in a transactional manner to create join/index tables
 
+
+Simple querying API
+* by ID
+* by some column name
+* Like dapper? actually use dapper? 
+* octopus deploy did it like :
+
+```
 var project = transaction.Query<Project>()
     .Where("Name = @name and IsDisabled = 0")
     .Parameter("name", "My Project");
@@ -37,26 +43,28 @@ var releases = transaction.Query<Release>()
 var releases = transaction.Query<Release>()
     .Where("ProjectId = @proj")
     .Parameter("proj", project.Id)
-    .ToList();
-
+    .ToList()
 ```
 
-Transactions/unit of work
-- transaction scope or something custom. reuse transactions from the framework.
+Transactions/unit of work to allow users to save several classes at once
+- transaction scope or something custom
+* could reuse transactions from the framework
 
+
+Generate create table statements using SqlBuilder based on the metatdata used to query the database.
 
 
 Guidelines for migrations/tooling to handle deserialisations errors?
 
 
-
 Sample app
-
+* maybe use the MS music store sample
 
 
 Demo using native SQL 2016 JSON support
 
 
-
-
 Searching over the json?
+
+
+.net caspnet core support
