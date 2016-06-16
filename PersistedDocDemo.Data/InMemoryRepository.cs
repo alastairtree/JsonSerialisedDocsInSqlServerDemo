@@ -21,6 +21,11 @@ namespace PersistedDocDemo.Data
         public IRepositoryConfig Config { get; }
         private Dictionary<object, object> Store { get; }
 
+        public override int Count()
+        {
+            return Store.Count;
+        }
+
         public override T Get(object id)
         {
             var value = default(T);

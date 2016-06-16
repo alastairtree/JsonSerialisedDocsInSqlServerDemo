@@ -4,6 +4,7 @@ namespace PersistedDocDemo.Data
 {
     public interface IRepository<T>
     {
+        int Count();
         T Get(object id);
         ICollection<T> GetAll();
         void Save(T item);

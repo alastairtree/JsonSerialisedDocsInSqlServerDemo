@@ -54,7 +54,7 @@ and in ormlite:
 db.Where<Person>  (new { Age = 27 });
 ```
 
-**Support a count operation**
+**<del>Support a count operation</del>**
 
 **Pagination?**
 

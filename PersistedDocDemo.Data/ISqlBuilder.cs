@@ -7,6 +7,7 @@ namespace PersistedDocDemo.Data
     {
         string SelectByIdSql();
         string SelectAllSql();
+        string SelectCountSql();
         string UpdateSql();
         string InsertSql();
         string DeleteByIdSql();

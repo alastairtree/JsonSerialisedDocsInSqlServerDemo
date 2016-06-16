@@ -82,6 +82,18 @@ namespace PersistedDocDemo.IntegrationTests
             Assert.Contains(GetId(item2), ids);
         }
 
+
+        [Test]
+        public void InsertTwoItemsAndThenCountReturnsTwo()
+        {
+            repository.Save(GetNewItem());
+            repository.Save(GetNewItem());
+
+            var actual = repository.Count();
+
+            Assert.AreEqual(2, actual);
+        }
+
         protected abstract object GetId(TEntity item);
     }
 }
