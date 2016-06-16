@@ -1,4 +1,5 @@
-# Sample APP to demonstrate complex c# objects Json serialised In Sql Server/the file system/in memory using a consistent interface
+# Sample .net code to demonstrate serialising any complex c# object to test
+and using Json.to.serialseserialised In Sql Server/the file system/in memory using a consistent interface
 
 Domonstration of using SQL server as a JSON document store for .net domain objects that are aggregate roots.
 

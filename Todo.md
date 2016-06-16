@@ -16,12 +16,14 @@
 
 
 **[SqlColumn] on enumerable supports database table**
-* as an option. enable consumers to swap between behaviours.
+
+* allow it as an option. enable consumers to swap between behaviours.
 * must be better than pipe delimited way as of now?
 * triggers? or generate extra  SQL in a transactional manner to create join/index tables
 
 
-Simple querying API
+**Simple querying API**
+
 * by ID
 * by some column name
 * Like dapper? actually use dapper? 
@@ -46,25 +48,39 @@ var releases = transaction.Query<Release>()
     .ToList()
 ```
 
-Transactions/unit of work to allow users to save several classes at once
-- transaction scope or something custom
+and in ormlite:
+
+``` 
+db.Where<Person>  (new { Age = 27 });
+```
+
+**Support a count operation**
+
+**Pagination?**
+
+**Transactions/unit of work to allow users to save several classes at once**
+
+* transaction scope or something custom
 * could reuse transactions from the framework
 
 
-Generate create table statements using SqlBuilder based on the metatdata used to query the database.
+**Generate database schema sql**
+
+ using SqlBuilder based on the metatdata used to query the database.
 
 
-Guidelines for migrations/tooling to handle deserialisations errors?
+**Guidelines for migrations/tooling to handle deserialisations errors?**
 
 
-Sample app
+**Sample app**
+
 * maybe use the MS music store sample
 
 
-Demo using native SQL 2016 JSON support
+**Demo using native SQL 2016 JSON support**
 
 
-Searching over the json?
+**Searching over the json?**
 
 
-.net caspnet core support
+**.net aspnet core support**
