@@ -45,6 +45,11 @@ namespace PersistedDocDemo.Data
             return $"SELECT {GenerateColumns()} FROM {TableName}";
         }
 
+        public string SelectCountSql()
+        {
+            return $"SELECT COUNT(1) FROM {TableName}";
+        }
+
         public string UpdateSql()
         {
             var setters = GenerateColumns(true, "[{0}]=@{0}");

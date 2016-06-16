@@ -16,6 +16,7 @@ namespace PersistedDocDemo.Data
 
         public string IdentityFieldName { get; }
         public IEntitySerialiser Serialiser { get; protected set; }
+        public abstract int Count();
         public abstract T Get(object id);
         public abstract ICollection<T> GetAll();
         public abstract void Save(T item);

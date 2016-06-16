@@ -8,6 +8,7 @@ namespace PersistedDocDemo.Data
 {
     public class FileRepository<T> : RepositoryBase<T>
     {
+        private readonly string fileSearchPattern = "*.dat";
         private string repositoryFolderPath;
 
         public FileRepository(IEntitySerialiser serialiser, IRepositoryConfig config)
@@ -58,6 +59,11 @@ namespace PersistedDocDemo.Data
             return Path.Combine(RepositoryFolderPath, folderOne, folderTwo, fileName);
         }
 
+        public override int Count()
+        {
+            return Directory.GetFiles(RepositoryFolderPath, fileSearchPattern, SearchOption.AllDirectories).Count();
+        }
+
         public override T Get(object id)
         {
             var fileName = GetFilenameFromId(id);
@@ -80,7 +86,7 @@ namespace PersistedDocDemo.Data
 
         public override ICollection<T> GetAll()
         {
-            var files = Directory.EnumerateFiles(RepositoryFolderPath, "*.dat", SearchOption.AllDirectories);
+            var files = Directory.EnumerateFiles(RepositoryFolderPath, fileSearchPattern, SearchOption.AllDirectories);
 
             var results = new List<T>();
 
@@ -139,7 +145,7 @@ namespace PersistedDocDemo.Data
 
         public override bool DeleteAll()
         {
-            var files = Directory.EnumerateFiles(RepositoryFolderPath, "*.dat", SearchOption.AllDirectories);
+            var files = Directory.EnumerateFiles(RepositoryFolderPath, fileSearchPattern, SearchOption.AllDirectories);
 
             var results = 0;
 

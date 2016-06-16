@@ -134,6 +134,12 @@ namespace PersistedDocDemo.Data
             }
         }
 
+        public override int Count()
+        {
+            var sql = sqlBuilder.SelectCountSql();
+            return (int) database.ExecuteSqlScalar(sql);
+        }
+
         public override T Get(object id)
         {
             var sql = sqlBuilder.SelectByIdSql();
