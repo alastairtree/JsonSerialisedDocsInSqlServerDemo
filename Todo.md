@@ -37,11 +37,11 @@ var project = transaction.Query<Project>()
 var releases = transaction.Query<Release>()
     .Where("ProjectId = @proj")
     .Parameter("proj", project.Id)
-    .ToList();var project = transaction.Query<Project>()
+    .ToList();
+var project = transaction.Query<Project>()
     .Where("Name = @name and IsDisabled = 0")
     .Parameter("name", "My Project");
     .First();
-
 var releases = transaction.Query<Release>()
     .Where("ProjectId = @proj")
     .Parameter("proj", project.Id)
