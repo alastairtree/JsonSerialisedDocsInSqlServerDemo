@@ -1,9 +1,6 @@
-# Sample .net code to demonstrate serialising any complex c# object to test
-and using Json.to.serialseserialised In Sql Server/the file system/in memory using a consistent interface
+# Sample app to demonstrate using SQL server as a JSON document store for .net domain objects.
 
-Domonstration of using SQL server as a JSON document store for .net domain objects that are aggregate roots.
-
-Sample app demonstrating storing serialised domain objects in sql server (and files, memory) as json, using the repository pattern. Capable of storing large complex object graphs in one table.
+Store serialised domain objects in sql server (and in files or in memory) as json, using the repository pattern. Capable of storing large complex object graphs in one table.
 
 ## Example
 
